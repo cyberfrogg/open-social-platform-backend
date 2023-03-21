@@ -2,6 +2,7 @@ import express from 'express';
 import Ping from './routes/api/v1/ping';
 
 const app = express();
+app.use(express.json());
 
 const InitializeApp = async () => {
     // instantiate routes
