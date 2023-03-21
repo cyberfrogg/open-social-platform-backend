@@ -4,7 +4,9 @@
     "description": "backend auth service",
     "main": "index.js",
     "scripts": {
-        "build": "npx tsc"
+        "build": "npx tsc",
+        "start": "node dist/index.js",
+        "dev": "npx nodemon src/index.ts"
     },
     "keywords": [
         "backend",
@@ -19,6 +21,7 @@
         "typescript": "^5.0.2"
     },
     "dependencies": {
+        "env": "^0.0.2",
         "express": "^4.18.2"
     }
 }

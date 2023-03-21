@@ -1,11 +1,22 @@
 import express from 'express';
+import Ping from './routes/api/v1/ping';
+
 const app = express();
-const port = 5000;
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
+const InitializeApp = async () => {
+    // instantiate routes
+    let routes = new Array<Ping>();
+    routes.push(new Ping("/api/v1/ping"));
 
-app.listen(port, () => {
-    return console.log(`Express is listening at http://localhost:${port}`);
-});
+    // initialize routes
+    for (const route of routes) {
+        await route.Initialize(app);
+    }
+
+    const appPort = process.env.PORT || 5001
+    app.listen(appPort, () => {
+        return console.log(`Auth Service is listening at port ${appPort}`);
+    });
+};
+
+InitializeApp();
