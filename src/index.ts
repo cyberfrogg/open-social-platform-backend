@@ -1,4 +1,6 @@
 import express from 'express';
+require('dotenv').config({ path: '.env' });
+
 import Ping from './routes/api/v1/ping';
 
 const app = express();
@@ -14,7 +16,7 @@ const InitializeApp = async () => {
         await route.Initialize(app);
     }
 
-    const appPort = process.env.PORT || 5001
+    const appPort = process.env.PORT
     app.listen(appPort, () => {
         return console.log(`Auth Service is listening at port ${appPort}`);
     });
