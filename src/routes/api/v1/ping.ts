@@ -1,7 +1,7 @@
 import { Express, Request, Response } from "express";
 
 import IRoute from "../../../utils/backend/IRoute";
-import ApiResponse from "../../../data/shared/apiResponse";
+import ReqResponse from "../../../data/shared/reqResponse";
 
 class Ping implements IRoute {
     readonly path: string;
@@ -15,7 +15,7 @@ class Ping implements IRoute {
     }
 
     async Execute(req: Request, res: Response) {
-        res.json(new ApiResponse(true, "", "pong!"))
+        res.json(new ReqResponse(true, "", "pong!"))
     }
 }
 
