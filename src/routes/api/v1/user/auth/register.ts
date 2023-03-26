@@ -18,9 +18,21 @@ class UserRegister implements IRoute {
     }
 
     Execute = async (req: Request, res: Response) => {
-        let response = await this.databaseQueries.UserQueries.Create("test", "email", "passhash");
+        let createResponse = await this.databaseQueries.UserQueries.Create("test", "email", "passhash");
 
-        res.json(new ReqResponse(true, "", response))
+        if (!createResponse.success) {
+            res.json(new ReqResponse(false, "ERRCODE_USER_CREATE_FAILED", null))
+            return;
+        }
+
+        let userRowData = await this.databaseQueries.UserQueries.GetRowByID(createResponse.data);
+
+        if (!userRowData.success || userRowData.data == null) {
+            res.json(new ReqResponse(false, "ERRCODE_USER_GETBYID_FAILED", null))
+            return;
+        }
+
+        res.json(new ReqResponse(true, "", userRowData.data.NoEmail().NoPassword()))
     }
 }
 

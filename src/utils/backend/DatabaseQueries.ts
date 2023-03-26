@@ -1,6 +1,6 @@
 import IDatabaseQueryCollection from "./IDatabaseQueryCollection";
-import { AuthQueries, IAuthQueries } from "./queries/authqueries";
-import { IUserQueries, UserQueries } from "./queries/userqueries";
+import { IAuthQueries } from "./queries/authqueries";
+import { IUserQueries } from "./queries/userqueries";
 
 type DatabaseQueryCollectionType = IDatabaseQueryCollection;
 
