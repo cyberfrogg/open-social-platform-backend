@@ -30,7 +30,7 @@ class UserRegister implements IRoute {
             { type: 'password', value: reqUserPassword },
             { type: 'turnstileCaptchaToken', value: reqUserTurnstileCaptcha }
         ];
-
+        //a
         // validate fields
         for (const reqField of reqFields) {
             if (reqField.value == undefined) {
