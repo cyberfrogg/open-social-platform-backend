@@ -18,6 +18,8 @@ const IsFieldValid = (value: any, type: string) => {
                 return validateEmailField(value);
             case "password":
                 return validatePasswordField(value);
+            case "turnstileCaptchaToken":
+                return validateTurnstileCaptchaTokenField(value);
             default:
                 return new ReqResponse(false, "ERRCODE_VALIDATION_NO_TYPE", null);
         }
@@ -82,6 +84,25 @@ const validatePasswordField = (value: any): ReqResponse<any> => {
 
         if (!PASSWORD_RANGE.IsStringInRange(passwordString)) {
             return new ReqResponse(false, "ERRVALID_LEN", PASSWORD_RANGE);
+        }
+
+        return new ReqResponse(true, "", null);
+    }
+    catch {
+        return new ReqResponse(false, "ERRVALID_INVALID", null);
+    }
+}
+
+const validateTurnstileCaptchaTokenField = (value: any): ReqResponse<any> => {
+    try {
+        if (value == undefined) {
+            return new ReqResponse(false, "ERRVALID_CANTBENULL", null);
+        }
+
+        const tokenString: string = value as string;
+
+        if (tokenString == "") {
+            return new ReqResponse(false, "ERRVALID_CANTBENULL", null);
         }
 
         return new ReqResponse(true, "", null);

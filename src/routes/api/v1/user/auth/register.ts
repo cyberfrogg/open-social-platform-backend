@@ -19,15 +19,19 @@ class UserRegister implements IRoute {
     }
 
     Execute = async (req: Request, res: Response) => {
+        // retrieve fields
         const reqUserNickname = req.body.nickname;
         const reqUserEmail = req.body.email;
         const reqUserPassword = req.body.password;
+        const reqUserTurnstileCaptcha = req.body.turnstileCaptchaToken;
         const reqFields = [
             { type: 'nickname', value: reqUserNickname },
             { type: 'email', value: reqUserEmail },
             { type: 'password', value: reqUserPassword },
+            { type: 'turnstileCaptchaToken', value: reqUserTurnstileCaptcha }
         ];
 
+        // validate fields
         for (const reqField of reqFields) {
             if (reqField.value == undefined) {
                 res.json(new ReqResponse(false, "ERRCODE_EMPTY_FIELDS", null))
