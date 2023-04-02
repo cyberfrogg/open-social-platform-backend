@@ -1,5 +1,6 @@
 import IDatabaseQueryCollection from "./IDatabaseQueryCollection";
 import { IAuthQueries } from "./queries/authqueries";
+import { IUserMetaQueries } from "./queries/usermetaqueries";
 import { IUserQueries } from "./queries/userqueries";
 
 type DatabaseQueryCollectionType = IDatabaseQueryCollection;
@@ -9,6 +10,7 @@ class DatabaseQueries {
     readonly QueryListDictionary: Map<DatabaseQueryCollectionType, IDatabaseQueryCollection>;
 
     readonly UserQueries: IUserQueries;
+    readonly UserMetaQueries: IUserMetaQueries;
     readonly AuthQueries: IAuthQueries;
 
     constructor(queryList: Array<IDatabaseQueryCollection>) {
@@ -20,6 +22,9 @@ class DatabaseQueries {
             switch (queryCollection.Name) {
                 case "UserQueries":
                     this.UserQueries = queryCollection as IUserQueries;
+                    break;
+                case "UserMetaQueries":
+                    this.UserMetaQueries = queryCollection as IUserMetaQueries;
                     break;
                 case "AuthQueries":
                     this.AuthQueries = queryCollection as IAuthQueries;

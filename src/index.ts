@@ -7,6 +7,8 @@ import UserRegister from './routes/api/v1/user/auth/register';
 import DatabaseQueries from './utils/backend/DatabaseQueries';
 import IDatabaseQueryCollection from './utils/backend/IDatabaseQueryCollection';
 import { IUserQueries, UserQueries } from './utils/backend/queries/userqueries';
+import { UserMetaQueries } from './utils/backend/queries/usermetaqueries';
+import { AuthQueries } from './utils/backend/queries/authqueries';
 
 const app = express();
 app.use(express.json());
@@ -15,7 +17,9 @@ app.use(express.json());
 const InitializeApp = async () => {
     // instantiate database queries
     let databaseQueriesList = new Array<IDatabaseQueryCollection>();
-    databaseQueriesList.push(new UserQueries())
+    databaseQueriesList.push(new UserQueries());
+    databaseQueriesList.push(new UserMetaQueries());
+    databaseQueriesList.push(new AuthQueries());
 
     let databaseQueries = new DatabaseQueries(databaseQueriesList);
     await databaseQueries.Initialize();
