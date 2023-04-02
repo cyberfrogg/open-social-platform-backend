@@ -30,7 +30,7 @@ class UserRegister implements IRoute {
             { type: 'password', value: reqUserPassword },
             { type: 'turnstileCaptchaToken', value: reqUserTurnstileCaptcha }
         ];
-        //a
+
         // validate fields
         for (const reqField of reqFields) {
             if (reqField.value == undefined) {
@@ -89,6 +89,8 @@ class UserRegister implements IRoute {
             res.json(new ReqResponse(false, "ERRCODE_USER_GETBYID_FAILED", null))
             return;
         }
+
+        await this.databaseQueries.UserMetaQueries.Exists(0, "test");
 
         res.json(new ReqResponse(true, "", userRowData.data.NoEmail().NoPassword()))
     }

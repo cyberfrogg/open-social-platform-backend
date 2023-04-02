@@ -33,7 +33,7 @@ class UserQueries implements IUserQueries {
         }
         catch (e) {
             console.error(e);
-            return response;
+            return new ReqResponse<number>(false, "ERRCODE_UNKNOWN");
         }
     }
 
@@ -71,7 +71,7 @@ class UserQueries implements IUserQueries {
         }
         catch (e) {
             console.error(e);
-            return response;
+            return new ReqResponse<UserRowData>(false, "ERRCODE_UNKNOWN", null);
         }
     }
 
@@ -109,7 +109,7 @@ class UserQueries implements IUserQueries {
         }
         catch (e) {
             console.error(e);
-            return response;
+            return new ReqResponse<UserRowData>(false, "ERRCODE_UNKNOWN", null);
         }
     }
 
@@ -123,6 +123,8 @@ class UserQueries implements IUserQueries {
             }) as any;
 
             response.success = true;
+
+            console.log(queryResult);
 
             if (queryResult.length == 0) {
                 response.message = "ERRCODE_USER_DOESNT_EXISTS";
@@ -147,7 +149,7 @@ class UserQueries implements IUserQueries {
         }
         catch (e) {
             console.error(e);
-            return response;
+            return new ReqResponse<UserRowData>(false, "ERRCODE_UNKNOWN", null);
         }
     }
 }
