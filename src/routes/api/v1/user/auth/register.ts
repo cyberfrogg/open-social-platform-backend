@@ -4,6 +4,11 @@ import IRoute from "../../../../../utils/backend/IRoute";
 import ReqResponse from "../../../../../data/shared/reqResponse";
 import DatabaseQueries from "../../../../../utils/backend/DatabaseQueries";
 import IsFieldValid from '../../../../../utils/shared/fieldvalidation';
+import { GenerateRandomString, HashString } from "../../../../../utils/shared/stringutils";
+import EmailVerificationToken from '../../../../../data/auth/emailVerificationToken';
+import SendEmail from '../../../../../utils/backend/sendemail';
+import GetEmailTemplateVerifyAccount from "../../../../../utils/backend/emailtemplates";
+import SaltValuePair from '../../../../../utils/shared/saltvaluepair';
 
 class UserRegister implements IRoute {
     readonly path: string;
@@ -73,9 +78,11 @@ class UserRegister implements IRoute {
             return;
         }
 
+        // hash user password
+        const reqUserPasswordSaltValuePairRaw = SaltValuePair.CreateSaltAndHashValue(reqUserPassword).ToRaw();
 
         // create user
-        let createResponse = await this.databaseQueries.UserQueries.Create(reqUserNickname, reqUserEmail, reqUserPassword);
+        let createResponse = await this.databaseQueries.UserQueries.Create(reqUserNickname, reqUserEmail, reqUserPasswordSaltValuePairRaw);
 
         if (!createResponse.success) {
             res.json(new ReqResponse(false, "ERRCODE_USER_CREATE_FAILED", null))
@@ -90,8 +97,29 @@ class UserRegister implements IRoute {
             return;
         }
 
-        await this.databaseQueries.UserMetaQueries.Exists(0, "test");
 
+        // generate email verification row
+        const emailVerificationToken = GenerateRandomString(50);
+        const emailVerificationTokenData = new EmailVerificationToken(emailVerificationToken, new Date(Date.now()));
+
+        let emailVerificationTokenInsertionResponse = await this.databaseQueries.UserMetaQueries.Replace(userRowData.data.ID, "emailVerificationToken", emailVerificationTokenData);
+        if (!emailVerificationTokenInsertionResponse.success) {
+            res.json(new ReqResponse(false, "ERRCODE_EMAIL_VERIFICATION_FAILED"))
+            return;
+        }
+
+        // send email verification 
+        try {
+            let emailTemplate = GetEmailTemplateVerifyAccount(emailVerificationToken);
+            await SendEmail(reqUserEmail, "Email Verification", emailTemplate);
+        }
+        catch (e) {
+            console.error(e);
+            res.json(new ReqResponse(false, "ERRCODE_EMAIL_VERIFICATION_SEND_FAILED"))
+            return;
+        }
+
+        // return success :)
         res.json(new ReqResponse(true, "", userRowData.data.NoEmail().NoPassword()))
     }
 }

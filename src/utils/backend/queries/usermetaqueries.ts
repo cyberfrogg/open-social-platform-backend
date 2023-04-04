@@ -149,7 +149,7 @@ class UserMetaQueries implements IUserMetaQueries {
                 queryResult[0].id,
                 queryResult[0].userid,
                 queryResult[0].keyname,
-                queryResult[0].value
+                valueJson
             );
 
             response.data = userMetaRowData;

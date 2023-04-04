@@ -124,8 +124,6 @@ class UserQueries implements IUserQueries {
 
             response.success = true;
 
-            console.log(queryResult);
-
             if (queryResult.length == 0) {
                 response.message = "ERRCODE_USER_DOESNT_EXISTS";
                 return response;
