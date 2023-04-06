@@ -50,6 +50,7 @@ class UserRegister implements IRoute {
             }
         }
 
+        let isUserFoundWithEmailOrNickname = false;
 
         // isUserExistsWithEmail
         let isUserExistsWithEmail = await this.databaseQueries.UserQueries.GetRowByEmail(reqUserEmail);
@@ -60,10 +61,8 @@ class UserRegister implements IRoute {
         }
 
         if (isUserExistsWithEmail.data != null) {
-            res.json(new ReqResponse(false, "ERRCODE_USER_EXISTS", null))
-            return;
+            isUserFoundWithEmailOrNickname = true;
         }
-
 
         // isUserExistsWithNickname
         let isUserExistsWithNickname = await this.databaseQueries.UserQueries.GetRowByEmail(reqUserNickname);
@@ -74,9 +73,34 @@ class UserRegister implements IRoute {
         }
 
         if (isUserExistsWithNickname.data != null) {
-            res.json(new ReqResponse(false, "ERRCODE_USER_EXISTS", null))
-            return;
+            isUserFoundWithEmailOrNickname = true;
         }
+
+        // delete if user exists and not verified
+        if (isUserFoundWithEmailOrNickname) {
+            let userId = isUserExistsWithEmail.data != null ? isUserExistsWithEmail.data.ID : isUserExistsWithNickname.data.ID;
+            let isUserVerified = await this.databaseQueries.UserMetaQueries.Get<EmailVerificationToken>(userId, EmailVerificationToken.Keyname);
+
+            if (!isUserVerified.success || isUserVerified.data.Value.IsVerified) {
+                res.json(new ReqResponse(false, "ERRCODE_USER_EXISTS", null));
+                return
+            }
+
+            if (!isUserVerified.data.Value.IsVerified) {
+                let deleteResponse = await this.databaseQueries.UserQueries.DeleteCompletlyByID(userId);
+                if (!deleteResponse.success || !deleteResponse.data) {
+                    res.json(new ReqResponse(false, "ERRCODE_USER_REWRITE_FAILED", null));
+                    return
+                }
+            } else {
+                res.json(new ReqResponse(false, "ERRCODE_USER_EXISTS", null));
+                return
+            }
+        }
+
+
+
+        // ACCOUNT CREATION //
 
         // hash user password
         const reqUserPasswordSaltValuePairRaw = SaltValuePair.CreateSaltAndHashValue(reqUserPassword).ToRaw();
@@ -100,9 +124,9 @@ class UserRegister implements IRoute {
 
         // generate email verification row
         const emailVerificationToken = GenerateRandomString(50);
-        const emailVerificationTokenData = new EmailVerificationToken(emailVerificationToken, new Date(Date.now()));
+        const emailVerificationTokenData = new EmailVerificationToken(emailVerificationToken, false, new Date(Date.now()));
 
-        let emailVerificationTokenInsertionResponse = await this.databaseQueries.UserMetaQueries.Replace(userRowData.data.ID, "emailVerificationToken", emailVerificationTokenData);
+        let emailVerificationTokenInsertionResponse = await this.databaseQueries.UserMetaQueries.Replace(userRowData.data.ID, EmailVerificationToken.Keyname, emailVerificationTokenData);
         if (!emailVerificationTokenInsertionResponse.success) {
             res.json(new ReqResponse(false, "ERRCODE_EMAIL_VERIFICATION_FAILED"))
             return;

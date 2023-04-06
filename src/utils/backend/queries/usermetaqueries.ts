@@ -9,9 +9,9 @@ const KEYNAME_LEN_MIN = 1;
 interface IUserMetaQueries extends IDatabaseQueryCollection {
     Initialize(): Promise<void>;
     Replace<TMetaValueType>(userid: number, keyname: string, value: TMetaValueType): Promise<ReqResponse<UserMetaRowData<TMetaValueType>>>;
-    Delete(userid: number, keyname: string): Promise<ReqResponse<any>>;
+    Delete(userid: number, keyname: string): Promise<ReqResponse<boolean>>;
     Get<TMetaValueType>(userid: number, keyname: string): Promise<ReqResponse<UserMetaRowData<TMetaValueType>>>;
-    Exists(userid: number, keyname: string): Promise<ReqResponse<any>>;
+    Exists(userid: number, keyname: string): Promise<ReqResponse<boolean>>;
 }
 
 class UserMetaQueries implements IUserMetaQueries {
@@ -79,12 +79,12 @@ class UserMetaQueries implements IUserMetaQueries {
         }
     }
 
-    async Delete(userid: number, keyname: string): Promise<ReqResponse<any>> {
-        let response = new ReqResponse<number>(false, "");
+    async Delete(userid: number, keyname: string): Promise<ReqResponse<boolean>> {
+        let response = new ReqResponse<boolean>(false, "", false);
 
         // validating keyname.
         if (keyname.length < KEYNAME_LEN_MIN || keyname.length > KEYNAME_LEN_MAX) {
-            return new ReqResponse<number>(false, "ERRCODE_KEYNAME_INVALID", 0);
+            return new ReqResponse<boolean>(false, "ERRCODE_KEYNAME_INVALID", false);
         }
 
         // DELETE row
@@ -95,16 +95,16 @@ class UserMetaQueries implements IUserMetaQueries {
             }) as any;
 
             if (queryResult.affectedRows == 0) {    // return error if nothing deleted
-                return new ReqResponse<number>(false, "ERRCODE_USERMETA_NOTFOUND");
+                return new ReqResponse<boolean>(false, "ERRCODE_USERMETA_NOTFOUND", false);
             }
 
-            response.data = queryResult.affectedRows;
+            response.data = true;
             response.success = true;
             return response;
         }
         catch (e) {
             console.error(e);
-            return new ReqResponse<number>(false, "ERRCODE_UNKNOWN");
+            return new ReqResponse<boolean>(false, "ERRCODE_UNKNOWN");
         }
     }
 
@@ -119,7 +119,7 @@ class UserMetaQueries implements IUserMetaQueries {
         // SELECT for users_meta row
         try {
             const queryResult = await excuteQuery({
-                query: "SELECT * FROM `users_meta WHERE userid = ? AND keyname = ?",
+                query: "SELECT * FROM `users_meta` WHERE userid = ? AND keyname = ?",
                 values: [userid, keyname]
             }) as any;
 
@@ -163,17 +163,17 @@ class UserMetaQueries implements IUserMetaQueries {
     }
 
     async Exists(userid: number, keyname: string): Promise<ReqResponse<boolean>> {
-        let response = new ReqResponse<boolean>(false, "");
+        let response = new ReqResponse<boolean>(false, "", false);
 
         // validating keyname.
         if (keyname.length < KEYNAME_LEN_MIN || keyname.length > KEYNAME_LEN_MAX) {
-            return new ReqResponse<boolean>(false, "ERRCODE_KEYNAME_INVALID", null);
+            return new ReqResponse<boolean>(false, "ERRCODE_KEYNAME_INVALID", false);
         }
 
         // SELECT for users_meta row
         try {
             const queryResult = await excuteQuery({
-                query: "SELECT COUNT(*) FROM users_meta WHERE userid = ? AND keyname = ?;",
+                query: "SELECT COUNT(*) FROM `users_meta` WHERE userid = ? AND keyname = ?;",
                 values: [userid, keyname]
             }) as any;
 
@@ -185,7 +185,7 @@ class UserMetaQueries implements IUserMetaQueries {
         }
         catch (e) {
             console.error(e);
-            return new ReqResponse<boolean>(false, "ERRCODE_UNKNOWN");
+            return new ReqResponse<boolean>(false, "ERRCODE_UNKNOWN", false);
         }
     }
 }

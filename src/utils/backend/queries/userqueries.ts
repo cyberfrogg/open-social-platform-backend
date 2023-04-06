@@ -9,6 +9,7 @@ interface IUserQueries extends IDatabaseQueryCollection {
     GetRowByID(id: number): Promise<ReqResponse<UserRowData>>;
     GetRowByNickname(nickname: string): Promise<ReqResponse<UserRowData>>;
     GetRowByEmail(email: string): Promise<ReqResponse<UserRowData>>;
+    DeleteCompletlyByID(id: number): Promise<ReqResponse<boolean>>;
 }
 
 class UserQueries implements IUserQueries {
@@ -148,6 +149,33 @@ class UserQueries implements IUserQueries {
         catch (e) {
             console.error(e);
             return new ReqResponse<UserRowData>(false, "ERRCODE_UNKNOWN", null);
+        }
+    }
+
+    async DeleteCompletlyByID(id: number): Promise<ReqResponse<boolean>> {
+        let response = new ReqResponse<boolean>(false, "", false);
+
+        try {
+            let isTransactionError = false;
+            let results = await executeTransaction()
+                .query("DELETE FROM `users_meta` WHERE userid=?", [id])
+                .query("DELETE FROM `users` WHERE id=?", [id])
+                .rollback(e => { console.error(e); isTransactionError = true; })
+                .commit()
+
+            if (isTransactionError) {
+                return new ReqResponse<boolean>(false, "ERRCODE_USER_DELETE_FAILED", false);
+            }
+
+            const affectedDeleteAffectedRows = results[0].affectedRows;
+
+            response.data = affectedDeleteAffectedRows >= 1;
+            response.success = true;
+            return response;
+        }
+        catch (e) {
+            console.error(e);
+            return new ReqResponse<boolean>(false, "ERRCODE_UNKNOWN", false);
         }
     }
 }

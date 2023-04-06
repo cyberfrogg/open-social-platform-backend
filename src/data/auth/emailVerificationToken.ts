@@ -1,10 +1,13 @@
 class EmailVerificationToken {
+    static readonly Keyname: string = "emailVerificationToken";
     Token: string;
-    Expires: Date;
+    IsVerified: boolean;
+    VerificateActionExpires: Date;
 
-    constructor(token: string, expires: Date) {
+    constructor(token: string, isVerified: boolean, verificationActionExpirationDate: Date) {
         this.Token = token;
-        this.Expires = expires;
+        this.VerificateActionExpires = verificationActionExpirationDate;
+        this.IsVerified = isVerified;
     }
 }
 
