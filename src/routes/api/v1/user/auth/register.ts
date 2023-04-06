@@ -9,6 +9,7 @@ import EmailVerificationToken from '../../../../../data/auth/emailVerificationTo
 import SendEmail from '../../../../../utils/backend/sendemail';
 import GetEmailTemplateVerifyAccount from "../../../../../utils/backend/emailtemplates";
 import SaltValuePair from '../../../../../utils/shared/saltvaluepair';
+import IsTurnstileValid from "../../../../../utils/backend/isTurnstileValid";
 
 class UserRegister implements IRoute {
     readonly path: string;
@@ -29,6 +30,7 @@ class UserRegister implements IRoute {
         const reqUserEmail = req.body.email;
         const reqUserPassword = req.body.password;
         const reqUserTurnstileCaptcha = req.body.turnstileCaptchaToken;
+        const reqUserIp = req.headers['x-forwarded-for'] as string || req.socket.remoteAddress;
         const reqFields = [
             { type: 'nickname', value: reqUserNickname },
             { type: 'email', value: reqUserEmail },
@@ -48,6 +50,13 @@ class UserRegister implements IRoute {
                 res.json(new ReqResponse(false, validateResult.message, validateResult.data))
                 return;
             }
+        }
+
+        // is captcha valid
+        const isCaptchaValid = await IsTurnstileValid(reqUserTurnstileCaptcha, reqUserIp);
+        if (!isCaptchaValid) {
+            res.json(new ReqResponse(false, "ERRCODE_CAPTCHA_FAILED", null))
+            return;
         }
 
         let isUserFoundWithEmailOrNickname = false;
