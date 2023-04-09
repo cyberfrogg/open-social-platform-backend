@@ -74,7 +74,7 @@ class UserRegister implements IRoute {
         }
 
         // isUserExistsWithNickname
-        let isUserExistsWithNickname = await this.databaseQueries.UserQueries.GetRowByEmail(reqUserNickname);
+        let isUserExistsWithNickname = await this.databaseQueries.UserQueries.GetRowByNickname(reqUserNickname);
 
         if (!isUserExistsWithNickname.success) {
             res.json(new ReqResponse(false, "ERRCODE_USER_VALIDATION_FAILED", null))
@@ -133,7 +133,8 @@ class UserRegister implements IRoute {
 
         // generate email verification row
         const emailVerificationToken = GenerateRandomString(50);
-        const emailVerificationTokenData = new EmailVerificationToken(emailVerificationToken, false, new Date(Date.now()));
+        const emailVerificationTokenExpiration = new Date(Date.now() + (3 * 3600 * 1000 * 24));
+        const emailVerificationTokenData = new EmailVerificationToken(emailVerificationToken, false, emailVerificationTokenExpiration);
 
         let emailVerificationTokenInsertionResponse = await this.databaseQueries.UserMetaQueries.Replace(userRowData.data.ID, EmailVerificationToken.Keyname, emailVerificationTokenData);
         if (!emailVerificationTokenInsertionResponse.success) {
@@ -153,7 +154,8 @@ class UserRegister implements IRoute {
         }
 
         // return success :)
-        res.json(new ReqResponse(true, "", userRowData.data.NoEmail().NoPassword()))
+        res.json(new ReqResponse(true, "", userRowData.data.NoEmail().NoPassword()));
+        return;
     }
 }
 

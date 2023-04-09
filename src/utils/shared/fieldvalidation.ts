@@ -19,7 +19,9 @@ const IsFieldValid = (value: any, type: string) => {
             case "password":
                 return validatePasswordField(value);
             case "turnstileCaptchaToken":
-                return validateTurnstileCaptchaTokenField(value);
+                return validateIsNotEmptyField(value);
+            case "verificationToken":
+                return validateIsNotEmptyField(value);
             default:
                 return new ReqResponse(false, "ERRCODE_VALIDATION_NO_TYPE", null);
         }
@@ -93,7 +95,7 @@ const validatePasswordField = (value: any): ReqResponse<any> => {
     }
 }
 
-const validateTurnstileCaptchaTokenField = (value: any): ReqResponse<any> => {
+const validateIsNotEmptyField = (value: any): ReqResponse<any> => {
     try {
         if (value == undefined) {
             return new ReqResponse(false, "ERRVALID_CANTBENULL", null);
@@ -111,5 +113,6 @@ const validateTurnstileCaptchaTokenField = (value: any): ReqResponse<any> => {
         return new ReqResponse(false, "ERRVALID_INVALID", null);
     }
 }
+
 
 export default IsFieldValid;

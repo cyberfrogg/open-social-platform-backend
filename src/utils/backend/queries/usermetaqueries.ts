@@ -11,6 +11,7 @@ interface IUserMetaQueries extends IDatabaseQueryCollection {
     Replace<TMetaValueType>(userid: number, keyname: string, value: TMetaValueType): Promise<ReqResponse<UserMetaRowData<TMetaValueType>>>;
     Delete(userid: number, keyname: string): Promise<ReqResponse<boolean>>;
     Get<TMetaValueType>(userid: number, keyname: string): Promise<ReqResponse<UserMetaRowData<TMetaValueType>>>;
+    GetByJsonValue<TMetaValueType>(keyname: string, jsonSearch: string, jsonSearchValue: string): Promise<ReqResponse<UserMetaRowData<TMetaValueType>>>;
     Exists(userid: number, keyname: string): Promise<ReqResponse<boolean>>;
 }
 
@@ -48,7 +49,7 @@ class UserMetaQueries implements IUserMetaQueries {
         if (rowAlreadyExistsResult.success && rowAlreadyExistsResult.data == true) { // check if ok & exists
 
             const queryResult = await excuteQuery({
-                query: "UPDATE `users_meta` SET value=? WHERE userid=?; keyname=?;",
+                query: "UPDATE `users_meta` SET value=? WHERE userid=? AND keyname=?",
                 values: [valueJson, userid, keyname]        // NEVER insert `value` from input.
             }) as any;
 
@@ -69,7 +70,7 @@ class UserMetaQueries implements IUserMetaQueries {
                 values: [userid, keyname, valueJson]        // NEVER insert `value` from input.
             }) as any;
 
-            response.data = queryResult.insertId;
+            response.data = new UserMetaRowData(queryResult.insertId, userid, keyname, value);
             response.success = true;
             return response;
         }
@@ -121,6 +122,60 @@ class UserMetaQueries implements IUserMetaQueries {
             const queryResult = await excuteQuery({
                 query: "SELECT * FROM `users_meta` WHERE userid = ? AND keyname = ?",
                 values: [userid, keyname]
+            }) as any;
+
+            // if nothing found - return error
+            if (queryResult.length == 0) {
+                return new ReqResponse<UserMetaRowData<TMetaValueType>>(false, "ERRCODE_USERMETA_DOESNT_EXISTS");
+            }
+            if (queryResult[0].id == undefined) {
+                return new ReqResponse<UserMetaRowData<TMetaValueType>>(false, "ERRCODE_USERMETA_DOESNT_EXISTS");
+            }
+
+            // parse json to object
+            let valueJson: TMetaValueType = null;
+            try {
+                valueJson = JSON.parse(queryResult[0].value);
+                if (valueJson == undefined || valueJson == null) {
+                    return new ReqResponse<UserMetaRowData<TMetaValueType>>(false, "ERRCODE_METAVALUE_JSON_FAIL");
+                }
+            }
+            catch (je) {
+                console.error(je);
+                return new ReqResponse<UserMetaRowData<TMetaValueType>>(false, "ERRCODE_METAVALUE_JSON_FAIL");
+            }
+
+            // row as class
+            const userMetaRowData = new UserMetaRowData(
+                queryResult[0].id,
+                queryResult[0].userid,
+                queryResult[0].keyname,
+                valueJson
+            );
+
+            response.data = userMetaRowData;
+            response.success = true;
+            return response;
+        }
+        catch (e) {
+            console.error(e);
+            return new ReqResponse<UserMetaRowData<TMetaValueType>>(false, "ERRCODE_UNKNOWN");
+        }
+    }
+
+    async GetByJsonValue<TMetaValueType>(keyname: string, jsonSearch: string, jsonSearchValue: string): Promise<ReqResponse<UserMetaRowData<TMetaValueType>>> {
+        let response = new ReqResponse<UserMetaRowData<TMetaValueType>>(false, "");
+
+        // validating keyname.
+        if (keyname.length < KEYNAME_LEN_MIN || keyname.length > KEYNAME_LEN_MAX) {
+            return new ReqResponse<UserMetaRowData<TMetaValueType>>(false, "ERRCODE_KEYNAME_INVALID", null);
+        }
+
+        // SELECT for users_meta row with json search and value filter
+        try {
+            const queryResult = await excuteQuery({
+                query: "SELECT * FROM `users_meta` WHERE `keyname` = ? AND JSON_EXTRACT(Value, ?) = ?",
+                values: [keyname, jsonSearch, jsonSearchValue]
             }) as any;
 
             // if nothing found - return error

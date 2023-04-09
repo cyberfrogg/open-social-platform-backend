@@ -100,7 +100,7 @@ const GetEmailTemplateVerifyAccount = (verificationToken: string) => {
     result = result.replace("{WEBSITENAME}", process.env.WEBSITE_NAME as string);
     result = result.replace("{WEBSITEURL}", process.env.WEBSITE_URL as string);
     result = result.replace("{SUBJECT}", "Verify your account");
-    result = result.replace("{CONTENT}", "Welcome to " + process.env.WEBSITE_NAME + '! Complete account creation by clicking on this link: <a href="' + url + '">' + url + "</a>");
+    result = result.replace("{CONTENT}", "Welcome to " + process.env.WEBSITE_NAME + '! Complete account creation by clicking on this link: <a href="' + url + '">' + url + "</a> <br><br> If you didn't perform this action - just ignore this email.");
 
     return result;
 }

@@ -58,8 +58,8 @@ class UserQueries implements IUserQueries {
                 return response;
             }
 
-            var createTimeDate = new Date(queryResult[0].create_time);
-            var userRowData = new UserRowData(
+            let createTimeDate = new Date(queryResult[0].create_time);
+            let userRowData = new UserRowData(
                 queryResult[0].id,
                 queryResult[0].nickname,
                 queryResult[0].email,
@@ -157,17 +157,21 @@ class UserQueries implements IUserQueries {
 
         try {
             let isTransactionError = false;
+            // queries should be ordered relativly to foregn keys hierarchy in db
             let results = await executeTransaction()
+                .query("DELETE FROM `sessions` WHERE userid=?", [id])
                 .query("DELETE FROM `users_meta` WHERE userid=?", [id])
                 .query("DELETE FROM `users` WHERE id=?", [id])
                 .rollback(e => { console.error(e); isTransactionError = true; })
                 .commit()
 
             if (isTransactionError) {
+                console.error("UserQueries - DeleteCompletlyByID - Transaction error");
                 return new ReqResponse<boolean>(false, "ERRCODE_USER_DELETE_FAILED", false);
             }
 
-            const affectedDeleteAffectedRows = results[0].affectedRows;
+            // always should take the last result with deleting user
+            const affectedDeleteAffectedRows = results[results.length - 1].affectedRows;
 
             response.data = affectedDeleteAffectedRows >= 1;
             response.success = true;

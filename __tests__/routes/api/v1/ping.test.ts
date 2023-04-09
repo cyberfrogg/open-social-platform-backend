@@ -19,7 +19,7 @@ describe("Test ping route", () => {
             {
                 success: true,
                 message: "",
-                data: "pong!"
+                data: "pong! (user)"
             }
         );
     });
