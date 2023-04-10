@@ -5,8 +5,9 @@ const IsTurnstileValid = async (turnstileClientResponse: string, remoteIp: strin
         return false;
     }
 
-    // TODO: Remove return true when test is ended
-    return true;
+    if (process.env.WEBSITE_TURNSTILE_CAPTCHA_ENABLED != "1") {
+        return true;
+    }
 
     const form = new URLSearchParams();
     form.append("secret", process.env.NEXT_PRIVATE_CLOUDFLARE_CAPTCHA_PRIVATETOKEN as string)

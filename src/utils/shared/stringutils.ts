@@ -5,7 +5,7 @@ const GenerateRandomString = (length: number) => {
 }
 
 const HashString = (value: string) => {
-    return crypto.createHash('sha256').update(value).digest('hex');
+    return crypto.createHash('sha256').update(value).digest('hex').toString();
 }
 
 const HashStringWithSalt = (value: string, salt: string) => {

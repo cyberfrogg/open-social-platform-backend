@@ -15,7 +15,7 @@ class Ping implements IRoute {
     }
 
     async Execute(req: Request, res: Response) {
-        res.json(new ReqResponse(true, "", "pong!"))
+        res.json(new ReqResponse(true, "", "pong! (user)"))
     }
 }
 
