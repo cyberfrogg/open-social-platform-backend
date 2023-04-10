@@ -1,0 +1,5 @@
+* text=auto
+*.css linguist-detectable=false
+*.svg linguist-detectable=false
+*.png linguist-detectable=false
+*.js linguist-detectable=false
