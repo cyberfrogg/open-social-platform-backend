@@ -4,6 +4,12 @@ import IRoute from "../../../../../utils/backend/IRoute";
 import ReqResponse from "../../../../../data/shared/reqResponse";
 import DatabaseQueries from "../../../../../utils/backend/DatabaseQueries";
 import IsFieldValid from '../../../../../utils/shared/fieldvalidation';
+import { GenerateRandomString, HashString } from "../../../../../utils/shared/stringutils";
+import EmailVerificationToken from '../../../../../data/auth/emailVerificationToken';
+import SendEmail from '../../../../../utils/backend/sendemail';
+import GetEmailTemplateVerifyAccount from "../../../../../utils/backend/emailtemplates";
+import SaltValuePair from '../../../../../utils/shared/saltvaluepair';
+import IsTurnstileValid from "../../../../../utils/backend/isTurnstileValid";
 
 class UserRegister implements IRoute {
     readonly path: string;
@@ -24,6 +30,7 @@ class UserRegister implements IRoute {
         const reqUserEmail = req.body.email;
         const reqUserPassword = req.body.password;
         const reqUserTurnstileCaptcha = req.body.turnstileCaptchaToken;
+        const reqUserIp = req.headers['x-forwarded-for'] as string || req.socket.remoteAddress;
         const reqFields = [
             { type: 'nickname', value: reqUserNickname },
             { type: 'email', value: reqUserEmail },
@@ -45,6 +52,14 @@ class UserRegister implements IRoute {
             }
         }
 
+        // is captcha valid
+        const isCaptchaValid = await IsTurnstileValid(reqUserTurnstileCaptcha, reqUserIp);
+        if (!isCaptchaValid) {
+            res.json(new ReqResponse(false, "ERRCODE_CAPTCHA_FAILED", null))
+            return;
+        }
+
+        let isUserFoundWithEmailOrNickname = false;
 
         // isUserExistsWithEmail
         let isUserExistsWithEmail = await this.databaseQueries.UserQueries.GetRowByEmail(reqUserEmail);
@@ -55,13 +70,11 @@ class UserRegister implements IRoute {
         }
 
         if (isUserExistsWithEmail.data != null) {
-            res.json(new ReqResponse(false, "ERRCODE_USER_EXISTS", null))
-            return;
+            isUserFoundWithEmailOrNickname = true;
         }
 
-
         // isUserExistsWithNickname
-        let isUserExistsWithNickname = await this.databaseQueries.UserQueries.GetRowByEmail(reqUserNickname);
+        let isUserExistsWithNickname = await this.databaseQueries.UserQueries.GetRowByNickname(reqUserNickname);
 
         if (!isUserExistsWithNickname.success) {
             res.json(new ReqResponse(false, "ERRCODE_USER_VALIDATION_FAILED", null))
@@ -69,13 +82,40 @@ class UserRegister implements IRoute {
         }
 
         if (isUserExistsWithNickname.data != null) {
-            res.json(new ReqResponse(false, "ERRCODE_USER_EXISTS", null))
-            return;
+            isUserFoundWithEmailOrNickname = true;
+        }
+
+        // delete if user exists and not verified
+        if (isUserFoundWithEmailOrNickname) {
+            let userId = isUserExistsWithEmail.data != null ? isUserExistsWithEmail.data.ID : isUserExistsWithNickname.data.ID;
+            let isUserVerified = await this.databaseQueries.UserMetaQueries.Get<EmailVerificationToken>(userId, EmailVerificationToken.Keyname);
+
+            if (!isUserVerified.success || isUserVerified.data.Value.IsVerified) {
+                res.json(new ReqResponse(false, "ERRCODE_USER_EXISTS", null));
+                return
+            }
+
+            if (!isUserVerified.data.Value.IsVerified) {
+                let deleteResponse = await this.databaseQueries.UserQueries.DeleteCompletlyByID(userId);
+                if (!deleteResponse.success || !deleteResponse.data) {
+                    res.json(new ReqResponse(false, "ERRCODE_USER_REWRITE_FAILED", null));
+                    return
+                }
+            } else {
+                res.json(new ReqResponse(false, "ERRCODE_USER_EXISTS", null));
+                return
+            }
         }
 
 
+
+        // ACCOUNT CREATION //
+
+        // hash user password
+        const reqUserPasswordSaltValuePairRaw = SaltValuePair.CreateSaltAndHashValue(reqUserPassword).ToRaw();
+
         // create user
-        let createResponse = await this.databaseQueries.UserQueries.Create(reqUserNickname, reqUserEmail, reqUserPassword);
+        let createResponse = await this.databaseQueries.UserQueries.Create(reqUserNickname, reqUserEmail, reqUserPasswordSaltValuePairRaw);
 
         if (!createResponse.success) {
             res.json(new ReqResponse(false, "ERRCODE_USER_CREATE_FAILED", null))
@@ -90,9 +130,32 @@ class UserRegister implements IRoute {
             return;
         }
 
-        await this.databaseQueries.UserMetaQueries.Exists(0, "test");
 
-        res.json(new ReqResponse(true, "", userRowData.data.NoEmail().NoPassword()))
+        // generate email verification row
+        const emailVerificationToken = GenerateRandomString(50);
+        const emailVerificationTokenExpiration = new Date(Date.now() + (3 * 3600 * 1000 * 24));
+        const emailVerificationTokenData = new EmailVerificationToken(emailVerificationToken, false, emailVerificationTokenExpiration);
+
+        let emailVerificationTokenInsertionResponse = await this.databaseQueries.UserMetaQueries.Replace(userRowData.data.ID, EmailVerificationToken.Keyname, emailVerificationTokenData);
+        if (!emailVerificationTokenInsertionResponse.success) {
+            res.json(new ReqResponse(false, "ERRCODE_EMAIL_VERIFICATION_FAILED"))
+            return;
+        }
+
+        // send email verification 
+        try {
+            let emailTemplate = GetEmailTemplateVerifyAccount(emailVerificationToken);
+            await SendEmail(reqUserEmail, "Email Verification", emailTemplate);
+        }
+        catch (e) {
+            console.error(e);
+            res.json(new ReqResponse(false, "ERRCODE_EMAIL_VERIFICATION_SEND_FAILED"))
+            return;
+        }
+
+        // return success :)
+        res.json(new ReqResponse(true, "", userRowData.data.NoEmail().NoPassword()));
+        return;
     }
 }
 
