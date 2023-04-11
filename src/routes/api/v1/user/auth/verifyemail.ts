@@ -55,10 +55,17 @@ class UserVerifyEmail implements IRoute {
             res.json(new ReqResponse(false, "ERRCODE_BAD_TOKEN", null))
             return;
         }
+        verificationRow.data.Value.VerificateActionExpires = new Date(verificationRow.data.Value.VerificateActionExpires);
 
         // return if already activated
         if (verificationRow.data.Value.IsVerified) {
             res.json(new ReqResponse(false, "ERRCODE_ALREADY_ACTIVATED", null))
+            return;
+        }
+
+        // check if expired
+        if (new Date(Date.now()) > verificationRow.data.Value.VerificateActionExpires) {
+            res.json(new ReqResponse(false, "ERRCODE_TOKEN_EXPIRED", null))
             return;
         }
 
