@@ -7,7 +7,7 @@ import IsFieldValid from '../../../../../utils/shared/fieldvalidation';
 import { GenerateRandomString, HashString } from "../../../../../utils/shared/stringutils";
 import EmailVerificationToken from '../../../../../data/auth/emailVerificationToken';
 import SendEmail from '../../../../../utils/backend/sendemail';
-import GetEmailTemplateVerifyAccount from "../../../../../utils/backend/emailtemplates";
+import { GetEmailTemplateVerifyAccount } from "../../../../../utils/backend/emailtemplates";
 import SaltValuePair from '../../../../../utils/shared/saltvaluepair';
 import IsTurnstileValid from "../../../../../utils/backend/isTurnstileValid";
 

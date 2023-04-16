@@ -11,6 +11,7 @@ import { UserMetaQueries } from './utils/backend/queries/usermetaqueries';
 import { SessionQueries } from './utils/backend/queries/sessionqueries';
 import UserVerifyEmail from './routes/api/v1/user/auth/verifyemail';
 import UserLogin from './routes/api/v1/user/auth/login';
+import UserResetPasswordStart from './routes/api/v1/user/auth/resetpasswordstart';
 
 const app = express();
 app.use(express.json());
@@ -33,6 +34,7 @@ const InitializeApp = async () => {
     routes.push(new UserRegister("/api/v1/user/auth/register", databaseQueries));
     routes.push(new UserVerifyEmail("/api/v1/user/auth/verifyemail", databaseQueries));
     routes.push(new UserLogin("/api/v1/user/auth/login", databaseQueries));
+    routes.push(new UserResetPasswordStart("/api/v1/user/auth/resetpasswordstart", databaseQueries));
 
 
     // initialize routes

@@ -1,6 +1,6 @@
 import IDatabaseQueryCollection from "../IDatabaseQueryCollection";
 import ReqResponse from '../../../data/shared/reqResponse';
-import UserSessionRowData from '../../../data/auth/userSessionRowData';
+import UserSessionRowData from '../../../data/sessions/userSessionRowData';
 import { excuteQuery } from "../mysqldb";
 
 interface ISessionQueries extends IDatabaseQueryCollection {
