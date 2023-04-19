@@ -118,4 +118,16 @@ const GetEmailTemplateResetPassword = (resetToken: string) => {
     return result;
 }
 
-export { GetEmailTemplateVerifyAccount, GetEmailTemplateResetPassword };
+const GetEmailTemplateResetPasswordComplete = () => {
+    let result = verifyAccountEmailTemplate;
+    result = result.replace("{WEBSITENAME}", process.env.WEBSITE_NAME as string);
+    result = result.replace("{WEBSITENAME}", process.env.WEBSITE_NAME as string);
+    result = result.replace("{WEBSITENAME}", process.env.WEBSITE_NAME as string);
+    result = result.replace("{WEBSITEURL}", process.env.WEBSITE_URL as string);
+    result = result.replace("{SUBJECT}", "Password has been reset");
+    result = result.replace("{CONTENT}", "Password reset was performed on " + process.env.WEBSITE_NAME + "!  <br><br> If you didn't perform this action - IMMEDIATELY reset your password!");
+
+    return result;
+}
+
+export { GetEmailTemplateVerifyAccount, GetEmailTemplateResetPassword, GetEmailTemplateResetPasswordComplete };

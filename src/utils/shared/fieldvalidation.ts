@@ -22,6 +22,8 @@ const IsFieldValid = (value: any, type: string) => {
                 return validateIsNotEmptyField(value);
             case "verificationToken":
                 return validateIsNotEmptyField(value);
+            case "passwordResetToken":
+                return validateIsNotEmptyField(value);
             case "nicknameOrEmail":
                 return validateIsNotEmptyField(value);
             default:

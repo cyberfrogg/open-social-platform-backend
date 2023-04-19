@@ -12,6 +12,8 @@ import { SessionQueries } from './utils/backend/queries/sessionqueries';
 import UserVerifyEmail from './routes/api/v1/user/auth/verifyemail';
 import UserLogin from './routes/api/v1/user/auth/login';
 import UserResetPasswordStart from './routes/api/v1/user/auth/resetpasswordstart';
+import UserResetPasswordComplete from './routes/api/v1/user/auth/resetpasswordcomplete';
+import ReqResponse from './data/shared/reqResponse';
 
 const app = express();
 app.use(express.json());
@@ -35,6 +37,7 @@ const InitializeApp = async () => {
     routes.push(new UserVerifyEmail("/api/v1/user/auth/verifyemail", databaseQueries));
     routes.push(new UserLogin("/api/v1/user/auth/login", databaseQueries));
     routes.push(new UserResetPasswordStart("/api/v1/user/auth/resetpasswordstart", databaseQueries));
+    routes.push(new UserResetPasswordComplete("/api/v1/user/auth/resetpasswordcomplete", databaseQueries));
 
 
     // initialize routes
@@ -43,10 +46,19 @@ const InitializeApp = async () => {
         console.log(`\x1b[32mInitialized ${route.path} route \x1b[0m'`);
     }
 
+    // handle all other errors
+    app.use((err, req, res, next) => {
+        if (err instanceof SyntaxError && 'body' in err) {
+            console.error(err);
+            return res.json(new ReqResponse(false, "ERRCODE_UNKNOWN", null));
+        }
+        next();
+    });
+
     // start service
     const appPort = process.env.PORT
     app.listen(appPort, () => {
-        return console.log(`Auth Service is listening at port ${appPort}`);
+        return console.log(`Users Service is listening at port ${appPort}`);
     });
 };
 

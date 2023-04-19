@@ -10,6 +10,7 @@ interface IUserQueries extends IDatabaseQueryCollection {
     GetRowByNickname(nickname: string): Promise<ReqResponse<UserRowData>>;
     GetRowByEmail(email: string): Promise<ReqResponse<UserRowData>>;
     DeleteCompletlyByID(id: number): Promise<ReqResponse<boolean>>;
+    UpdatePasswordById(id: number, newPasswordHash: string): Promise<ReqResponse<boolean>>;
 }
 
 class UserQueries implements IUserQueries {
@@ -180,6 +181,25 @@ class UserQueries implements IUserQueries {
         catch (e) {
             console.error(e);
             return new ReqResponse<boolean>(false, "ERRCODE_UNKNOWN", false);
+        }
+    }
+
+    async UpdatePasswordById(id: number, newPasswordHash: string): Promise<ReqResponse<boolean>> {
+        let response = new ReqResponse<boolean>(false, "", false);
+
+        try {
+            const queryResult = await excuteQuery({
+                query: "UPDATE `users` SET password=? WHERE id=?",
+                values: [newPasswordHash, id]
+            }) as any;
+
+            response.data = queryResult.affectedRows >= 1;
+            response.success = true;
+            return response;
+        }
+        catch (e) {
+            console.error(e);
+            return new ReqResponse<boolean>(false, "ERRCODE_UNKNOWN");
         }
     }
 }
