@@ -26,6 +26,8 @@ const IsFieldValid = (value: any, type: string) => {
                 return validateIsNotEmptyField(value);
             case "nicknameOrEmail":
                 return validateIsNotEmptyField(value);
+            case "userid":
+                return validateIsNotEmptyField(value);
             default:
                 return new ReqResponse(false, "ERRCODE_VALIDATION_NO_TYPE", null);
         }
