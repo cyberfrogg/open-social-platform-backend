@@ -1,0 +1,44 @@
+name: OSP-USERS - Create podman image (master)
+run-name: Creating podman image (master) 🚀 (by ${{ github.actor }})
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Spinning up ${{ github.event_name }} on branch ${{ github.ref }} | os ${{ runner.os }}"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Clone repo
+        uses: actions/checkout@v3
+        with:
+            ref: 'master'
+      - name: List files
+        run: |
+          ls -la ${{ github.workspace }}
+          pwd
+      - name: Install podman & podman-compose
+        run: |
+          sudo apt-get install podman
+          sudo apt-get install podman-compose
+          sudo apt-get install tar
+      - name: create basic ubuntu container
+        run: |
+          podman pull ubuntu:latest
+          podman run -ti --name osp-service-users ubuntu:latest -v ${{ github.workspace }}:/home:Z
+      - name: CONTAINER - Install packages
+        run: |
+          podman exec osp-service-users curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+          podman exec osp-service-users nvm --version
+          podman exec osp-service-users nvm ls-remote
+          podman exec osp-service-users nvm install 18.15.0
+      - name: Commit container
+        run: |
+          podman commit osp-service-users
+          podman images
+          podman save --output produced-images.tar
+          tar -xvf produced-images.tar
+          ls -la
+
+
+
+            
+
