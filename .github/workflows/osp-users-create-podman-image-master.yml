@@ -2,7 +2,7 @@ name: OSP-USERS - Create podman image (master)
 run-name: Creating podman image (master) 🚀 (by ${{ github.actor }})
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  OSP-USERS-create-podman-image:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Spinning up ${{ github.event_name }} on branch ${{ github.ref }} | os ${{ runner.os }}"
@@ -18,7 +18,6 @@ jobs:
       - name: Install podman & podman-compose
         run: |
           sudo apt-get install podman
-          sudo apt-get install podman-compose
           sudo apt-get install tar
       - name: create basic ubuntu container
         run: |
