@@ -22,14 +22,14 @@ jobs:
       - name: create basic ubuntu container
         run: |
           podman pull ubuntu:latest
-          podman run -ti --name osp-service-users ubuntu:latest -v ${{ github.workspace }}:/home:Z
+          podman run --name osp-service-users -v ${{ github.workspace }}:/home:Z ubuntu:latest
       - name: CONTAINER - Install packages
         run: |
           podman exec osp-service-users curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
           podman exec osp-service-users nvm --version
           podman exec osp-service-users nvm ls-remote
           podman exec osp-service-users nvm install 18.15.0
-      - name: Commit container
+      - name: Commit container and export image
         run: |
           podman commit osp-service-users
           podman images
