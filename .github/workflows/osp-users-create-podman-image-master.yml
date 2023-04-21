@@ -23,6 +23,7 @@ jobs:
         run: |
           podman pull ubuntu:latest
           podman run --name osp-service-users -v ${{ github.workspace }}:/home:Z ubuntu:latest
+          podman start osp-service-users
       - name: CONTAINER - Install packages
         run: |
           podman exec osp-service-users curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
