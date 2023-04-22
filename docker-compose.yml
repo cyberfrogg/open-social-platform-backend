@@ -13,7 +13,8 @@ services:
     command: bash -c "
         echo running container &&
         ls -la &&
-        npm build
+        npm install &&
+        npm build &&
         npm start
       "
 
