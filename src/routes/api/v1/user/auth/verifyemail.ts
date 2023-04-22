@@ -5,6 +5,7 @@ import ReqResponse from "../../../../../data/shared/reqResponse";
 import IsFieldValid from "../../../../../utils/shared/fieldvalidation";
 import IsTurnstileValid from "../../../../../utils/backend/isTurnstileValid";
 import EmailVerificationToken from "../../../../../data/auth/emailVerificationToken";
+import IsDateExpired from '../../../../../utils/shared/isDateExpired';
 
 class UserVerifyEmail implements IRoute {
     readonly path: string;
@@ -55,10 +56,17 @@ class UserVerifyEmail implements IRoute {
             res.json(new ReqResponse(false, "ERRCODE_BAD_TOKEN", null))
             return;
         }
+        verificationRow.data.Value.VerificateActionExpires = new Date(verificationRow.data.Value.VerificateActionExpires);
 
         // return if already activated
         if (verificationRow.data.Value.IsVerified) {
             res.json(new ReqResponse(false, "ERRCODE_ALREADY_ACTIVATED", null))
+            return;
+        }
+
+        // check if expired
+        if (IsDateExpired(verificationRow.data.Value.VerificateActionExpires)) {
+            res.json(new ReqResponse(false, "ERRCODE_TOKEN_EXPIRED", null))
             return;
         }
 

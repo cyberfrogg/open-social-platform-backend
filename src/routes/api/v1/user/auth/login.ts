@@ -64,7 +64,7 @@ class UserLogin implements IRoute {
             targetUser = foundUserByNickname.data;
         }
         else if (foundUserByEmail.success && foundUserByEmail.data != null) {
-            targetUser = foundUserByNickname.data;
+            targetUser = foundUserByEmail.data;
         }
         else {
             targetUser = null;

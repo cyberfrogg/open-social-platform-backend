@@ -1,6 +1,6 @@
 const cloudflareTurnstileApi = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
-const IsTurnstileValid = async (turnstileClientResponse: string, remoteIp: string) => {
+const IsTurnstileValid = async (turnstileClientResponse: string, remoteIp: string): Promise<boolean> => {
     if (turnstileClientResponse == undefined) {
         return false;
     }
