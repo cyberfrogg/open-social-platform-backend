@@ -105,4 +105,29 @@ const GetEmailTemplateVerifyAccount = (verificationToken: string) => {
     return result;
 }
 
-export default GetEmailTemplateVerifyAccount;
+const GetEmailTemplateResetPassword = (resetToken: string) => {
+    let result = verifyAccountEmailTemplate;
+    let url = process.env.WEBSITE_URL + "/auth/restore-password?" + new URLSearchParams({ token: resetToken })
+    result = result.replace("{WEBSITENAME}", process.env.WEBSITE_NAME as string);
+    result = result.replace("{WEBSITENAME}", process.env.WEBSITE_NAME as string);
+    result = result.replace("{WEBSITENAME}", process.env.WEBSITE_NAME as string);
+    result = result.replace("{WEBSITEURL}", process.env.WEBSITE_URL as string);
+    result = result.replace("{SUBJECT}", "Reset password");
+    result = result.replace("{CONTENT}", "You are resetting password on " + process.env.WEBSITE_NAME + '! To reset account password, click the link: <a href="' + url + '">' + url + "</a> <br><br> If you didn't perform this action - just ignore this email.");
+
+    return result;
+}
+
+const GetEmailTemplateResetPasswordComplete = () => {
+    let result = verifyAccountEmailTemplate;
+    result = result.replace("{WEBSITENAME}", process.env.WEBSITE_NAME as string);
+    result = result.replace("{WEBSITENAME}", process.env.WEBSITE_NAME as string);
+    result = result.replace("{WEBSITENAME}", process.env.WEBSITE_NAME as string);
+    result = result.replace("{WEBSITEURL}", process.env.WEBSITE_URL as string);
+    result = result.replace("{SUBJECT}", "Password has been reset");
+    result = result.replace("{CONTENT}", "Password reset was performed on " + process.env.WEBSITE_NAME + "!  <br><br> If you didn't perform this action - IMMEDIATELY reset your password!");
+
+    return result;
+}
+
+export { GetEmailTemplateVerifyAccount, GetEmailTemplateResetPassword, GetEmailTemplateResetPasswordComplete };
