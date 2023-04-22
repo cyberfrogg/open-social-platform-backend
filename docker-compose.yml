@@ -26,6 +26,8 @@ services:
       - NET_INTERSERVER_SECRET_TOKEN=token
     volumes:
       - ./:/home/node/app:Z
+    ports:
+      - "5001:5001"
     expose:
       - "5001"
     command: bash -c "
