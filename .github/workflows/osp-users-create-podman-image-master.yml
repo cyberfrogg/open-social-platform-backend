@@ -26,12 +26,16 @@ jobs:
           podman ps -a
       - name: CONTAINER - Install packages
         run: |
-          podman exec osp-service-users apt-get -y update
-          podman exec osp-service-users apt-get -y install curl
-          podman exec osp-service-users curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-          podman exec osp-service-users nvm --version
-          podman exec osp-service-users nvm ls-remote
-          podman exec osp-service-users nvm install 18.15.0
+          podman attach osp-service-users
+          apt-get -y update
+          apt-get -y install curl
+          curl https://get.volta.sh | bash
+          volta install node@18.15.0
+          node -v
+          ls -la
+          cd /home
+          ls -la
+          exit
       - name: Commit container and export image
         run: |
           podman commit osp-service-users
