@@ -15,14 +15,14 @@ jobs:
         run: |
           ls -la ${{ github.workspace }}
           pwd
-      - name: Install podman & podman-compose
+      - name: Install packages
         run: |
           sudo apt-get install podman
           sudo apt-get install tar
       - name: create basic ubuntu container
         run: |
           podman pull ubuntu:latest
-          podman run --name osp-service-users -v ${{ github.workspace }}:/home:Z ubuntu:latest
+          podman run -ti -d --name osp-service-users -v ${{ github.workspace }}:/home:Z ubuntu:latest
           podman ps -a
       - name: CONTAINER - Install packages
         run: |
