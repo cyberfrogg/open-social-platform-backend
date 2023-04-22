@@ -27,15 +27,14 @@ jobs:
       - name: CONTAINER - Install packages
         run: |
           podman attach osp-service-users
-          apt-get -y update
-          apt-get -y install curl
-          curl https://get.volta.sh | bash
-          volta install node@18.15.0
-          node -v
-          ls -la
-          cd /home
-          ls -la
-          exit
+          podman exec osp-service-users apt-get -y update
+          podman exec osp-service-users apt-get -y install curl
+          podman exec osp-service-users curl https://get.volta.sh | bash
+          podman exec osp-service-users volta install node@18.15.0
+          podman exec osp-service-users node -v
+          podman exec osp-service-users ls -la
+          podman exec osp-service-users cd /home
+          podman exec osp-service-users ls -la
       - name: Commit container and export image
         run: |
           podman commit osp-service-users
