@@ -19,7 +19,6 @@ jobs:
         run: |
           sudo apt-get install podman
           sudo apt-get install tar
-          sudo apt-get install curl
       - name: create basic ubuntu container
         run: |
           podman pull ubuntu:latest
@@ -27,6 +26,8 @@ jobs:
           podman ps -a
       - name: CONTAINER - Install packages
         run: |
+          podman exec osp-service-users apt-get update
+          podman exec osp-service-users apt-get install curl
           podman exec osp-service-users curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
           podman exec osp-service-users nvm --version
           podman exec osp-service-users nvm ls-remote
