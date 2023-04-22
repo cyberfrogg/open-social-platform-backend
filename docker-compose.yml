@@ -13,8 +13,7 @@ services:
     command: bash -c "
         echo running container &&
         ls -la &&
-        npm config set unsafe-perm true &&
-        npm install &&
+        npm install --unsafe-perm &&
         npm build &&
         npm start
       "
