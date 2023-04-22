@@ -19,6 +19,7 @@ jobs:
         run: |
           sudo apt-get install podman
           sudo apt-get install tar
+          sudo apt-get install curn
       - name: create basic ubuntu container
         run: |
           podman pull ubuntu:latest
