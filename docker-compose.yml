@@ -7,7 +7,16 @@ services:
     environment:
       - NODE_ENV=production
     volumes:
-      - ./:/home/node/app
+      - ./:/home/node/app:Z
     expose:
       - "8081"
-    command: "npm start"
+    command: bash -c "
+        echo running container &&
+        ls -la &&
+        npm build
+        npm start
+      "
+
+
+
+
