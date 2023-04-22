@@ -2,7 +2,7 @@ version: "2"
 services:
   node:
     image: "node:18.15.0"
-    user: "node"
+    user: "root"
     working_dir: /home/node/app
     environment:
       - NODE_ENV=production
@@ -13,11 +13,8 @@ services:
     command: bash -c "
         echo running container &&
         ls -la &&
-        npm install --unsafe-perm &&
-        npm build &&
-        npm start
+        chown root:root -R /home/node/app &&
+        npm install &&
+        npm run build &&
+        npm run start
       "
-
-
-
-
