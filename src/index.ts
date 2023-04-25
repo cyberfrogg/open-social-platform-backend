@@ -1,5 +1,6 @@
 import express from 'express';
 require('dotenv').config({ path: '.env' });
+const cors = require('cors');
 
 import Ping from './routes/api/v1/ping';
 import UserRegister from './routes/api/v1/user/auth/register';
@@ -18,6 +19,9 @@ import UserGetNickname from './routes/api/v1/user/getnickname';
 
 const app = express();
 app.use(express.json());
+app.use(cors({
+    origin: process.env.WEBSITE_CORS_URL
+}));
 
 
 const InitializeApp = async () => {
