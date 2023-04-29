@@ -1,3 +1,5 @@
+GPL
+
 open-social-platform-backend-users
 
 Copyright (C) 2023
