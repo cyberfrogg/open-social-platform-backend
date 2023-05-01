@@ -45,11 +45,11 @@ const validateNicknameField = (value: any): ReqResponse<any> => {
         const nicknameString: string = value as string;
 
         if (!NICKNAME_RANGE.IsStringInRange(nicknameString)) {
-            return new ReqResponse(false, "ERRVALID_LEN", NICKNAME_RANGE);
+            return new ReqResponse(false, "ERRVALID_NICKNAME_LEN", NICKNAME_RANGE);
         }
 
         if (!NICKNAME_REGEX_TEST.test(nicknameString)) {
-            return new ReqResponse(false, "ERRVALID_INVALIDCHARS", null);
+            return new ReqResponse(false, "ERRVALID_NICKNAME_INVALIDCHARS", null);
         }
 
         return new ReqResponse(true, "", null);
@@ -68,11 +68,11 @@ const validateEmailField = (value: any): ReqResponse<any> => {
         const emailString: string = value as string;
 
         if (!EMAIL_RANGE.IsStringInRange(emailString)) {
-            return new ReqResponse(false, "ERRVALID_LEN", EMAIL_RANGE);
+            return new ReqResponse(false, "ERRVALID_EMAIL_LEN", EMAIL_RANGE);
         }
 
         if (!EMAIL_REGEX_TEST.test(emailString.toLowerCase())) {
-            return new ReqResponse(false, "ERRVALID_INVALID", null);
+            return new ReqResponse(false, "ERRVALID_EMAIL_INVALID", null);
         }
 
         return new ReqResponse(true, "", null);
@@ -91,7 +91,7 @@ const validatePasswordField = (value: any): ReqResponse<any> => {
         const passwordString: string = value as string;
 
         if (!PASSWORD_RANGE.IsStringInRange(passwordString)) {
-            return new ReqResponse(false, "ERRVALID_LEN", PASSWORD_RANGE);
+            return new ReqResponse(false, "ERRVALID_PASSWORD_LEN", PASSWORD_RANGE);
         }
 
         return new ReqResponse(true, "", null);
