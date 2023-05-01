@@ -16,6 +16,7 @@ import UserResetPasswordStart from './routes/api/v1/user/auth/resetpasswordstart
 import UserResetPasswordComplete from './routes/api/v1/user/auth/resetpasswordcomplete';
 import ReqResponse from './data/shared/reqResponse';
 import UserGetNickname from './routes/api/v1/user/getnickname';
+import UserGetByNickname from './routes/api/v1/user/getbynickname';
 
 const app = express();
 app.use(express.json());
@@ -44,6 +45,7 @@ const InitializeApp = async () => {
     routes.push(new UserResetPasswordStart("/api/v1/user/auth/resetpasswordstart", databaseQueries));
     routes.push(new UserResetPasswordComplete("/api/v1/user/auth/resetpasswordcomplete", databaseQueries));
     routes.push(new UserGetNickname("/api/v1/user/getnickname", databaseQueries));
+    routes.push(new UserGetByNickname("/api/v1/user/getuserbynickname", databaseQueries));
 
 
     // initialize routes
