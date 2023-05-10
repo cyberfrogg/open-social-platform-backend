@@ -68,7 +68,7 @@ class PostCreate implements IRoute {
             return;
         }
 
-        res.json(new ReqResponse(false, "", postInsertResult.data))
+        res.json(new ReqResponse(true, "", postInsertResult.data))
     }
 }
 
