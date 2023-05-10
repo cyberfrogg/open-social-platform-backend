@@ -1,4 +1,11 @@
-# Open Social Platform (user service)
+# Open Social Platform (backend)
+
+This repo contains backend source code of "Open Social Platform" project.
+
+## Features
+- User Auth
+- User Data fetch
+- Post creation
 
 ## SQL Database structure
 

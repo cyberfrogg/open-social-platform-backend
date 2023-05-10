@@ -17,6 +17,8 @@ import UserResetPasswordComplete from './routes/api/v1/user/auth/resetpasswordco
 import ReqResponse from './data/shared/reqResponse';
 import UserGetNickname from './routes/api/v1/user/getnickname';
 import UserGetByNickname from './routes/api/v1/user/getbynickname';
+import IRoute from './utils/backend/IRoute';
+import PostCreate from './routes/api/v1/post/create';
 
 const app = express();
 app.use(express.json());
@@ -37,8 +39,9 @@ const InitializeApp = async () => {
 
 
     // instantiate routes
-    let routes = new Array<Ping>();
+    let routes = new Array<IRoute>();
     routes.push(new Ping("/api/v1/ping"));
+
     routes.push(new UserRegister("/api/v1/user/auth/register", databaseQueries));
     routes.push(new UserVerifyEmail("/api/v1/user/auth/verifyemail", databaseQueries));
     routes.push(new UserLogin("/api/v1/user/auth/login", databaseQueries));
@@ -46,6 +49,8 @@ const InitializeApp = async () => {
     routes.push(new UserResetPasswordComplete("/api/v1/user/auth/resetpasswordcomplete", databaseQueries));
     routes.push(new UserGetNickname("/api/v1/user/getnickname", databaseQueries));
     routes.push(new UserGetByNickname("/api/v1/user/getuserbynickname", databaseQueries));
+
+    routes.push(new PostCreate("/api/v1/post/create", databaseQueries));
 
 
     // initialize routes
