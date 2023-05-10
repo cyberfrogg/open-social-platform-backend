@@ -38,7 +38,6 @@ class PostCreate implements IRoute {
         }
         const userId = sessionRow.data.UserId;
 
-
         // sanitize post
         let sanitizedPostContent: PostContentData;
 
@@ -57,14 +56,19 @@ class PostCreate implements IRoute {
             }
         }
         catch (e) {
-            console.error("Failed to sanitize post");
-            console.error(e);
+            console.error("Failed to sanitize post. Message: " + e.message);
             res.json(new ReqResponse(false, "ERRCODE_SANITIZE", null));
             return;
         }
 
+        // insert post
+        const postInsertResult = await this.databaseQueries.PostQueries.CreatePost(userId, sanitizedPostContent);
+        if (!postInsertResult.success || postInsertResult.data == 0) {
+            res.json(postInsertResult);
+            return;
+        }
 
-        res.json(new ReqResponse(false, "end", null))
+        res.json(new ReqResponse(false, "", postInsertResult.data))
     }
 }
 

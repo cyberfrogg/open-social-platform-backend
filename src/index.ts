@@ -19,6 +19,7 @@ import UserGetNickname from './routes/api/v1/user/getnickname';
 import UserGetByNickname from './routes/api/v1/user/getbynickname';
 import IRoute from './utils/backend/IRoute';
 import PostCreate from './routes/api/v1/post/create';
+import { PostQueries } from './utils/backend/queries/postqueries';
 
 const app = express();
 app.use(express.json());
@@ -33,6 +34,7 @@ const InitializeApp = async () => {
     databaseQueriesList.push(new UserQueries());
     databaseQueriesList.push(new UserMetaQueries());
     databaseQueriesList.push(new SessionQueries());
+    databaseQueriesList.push(new PostQueries());
 
     let databaseQueries = new DatabaseQueries(databaseQueriesList);
     await databaseQueries.Initialize();
@@ -71,7 +73,7 @@ const InitializeApp = async () => {
     // start service
     const appPort = process.env.PORT
     app.listen(appPort, () => {
-        return console.log(`Users Service is listening at port ${appPort}`);
+        return console.log(`Backend is listening at port ${appPort}`);
     });
 };
 

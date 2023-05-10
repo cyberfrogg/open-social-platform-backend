@@ -1,4 +1,5 @@
 import IDatabaseQueryCollection from "./IDatabaseQueryCollection";
+import { IPostQueries } from "./queries/postqueries";
 import { ISessionQueries } from "./queries/sessionqueries";
 import { IUserMetaQueries } from "./queries/usermetaqueries";
 import { IUserQueries } from "./queries/userqueries";
@@ -12,6 +13,7 @@ class DatabaseQueries {
     readonly UserQueries: IUserQueries;
     readonly UserMetaQueries: IUserMetaQueries;
     readonly SessionQueries: ISessionQueries;
+    readonly PostQueries: IPostQueries;
 
     constructor(queryList: Array<IDatabaseQueryCollection>) {
         this.AllQueries = queryList;
@@ -28,6 +30,9 @@ class DatabaseQueries {
                     break;
                 case "SessionQueries":
                     this.SessionQueries = queryCollection as ISessionQueries;
+                    break;
+                case "PostQueries":
+                    this.PostQueries = queryCollection as IPostQueries;
                     break;
                 default:
                     break;
