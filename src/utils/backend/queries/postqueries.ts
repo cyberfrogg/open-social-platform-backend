@@ -7,7 +7,7 @@ import PostRowData from '../../../data/post/postrowdata';
 interface IPostQueries extends IDatabaseQueryCollection {
     Initialize(): Promise<void>;
     CreatePost(authorId: number, content: PostContentData): Promise<ReqResponse<number>>;
-    GetPostsBy(fieldname: string, value: string | number): Promise<ReqResponse<Array<PostRowData>>>;
+    GetPostsBy(columnname: string, value: string | number, orderByFieldname: string, isReverseOrder: boolean, limit: number, offset: number): Promise<ReqResponse<Array<PostRowData>>>;
 }
 
 class PostQueries implements IPostQueries {
@@ -52,26 +52,23 @@ class PostQueries implements IPostQueries {
         }
     }
 
-    async GetPostsBy(fieldname: string, value: string | number): Promise<ReqResponse<Array<PostRowData>>> {
+    async GetPostsBy(columnname: string, value: string | number, orderByFieldname: string, isReverseOrder: boolean, limit: number, offset: number): Promise<ReqResponse<Array<PostRowData>>> {
         let response = new ReqResponse<Array<PostRowData>>(false, "", new Array<PostRowData>());
 
-        switch (fieldname) {
-            case "id":
-                break;
-            case "authorid":
-                break;
-            case "lastedit_time":
-                break;
-            case "create_time":
-                break;
-            default:
-                return new ReqResponse<Array<PostRowData>>(false, "ERRCODE_INVALID_KEY");
+        // prevent mysql injection. i think
+        if (!this.IsColumnNameValid(columnname) || !this.IsColumnNameValid(orderByFieldname)) {
+            return new ReqResponse<Array<PostRowData>>(false, "ERRCODE_INVALID_KEY");
         }
+
+        // construct query
+        const dbQuery = "SELECT * FROM `posts` WHERE " + columnname + " = ? ORDER BY " + orderByFieldname + " " + (isReverseOrder ? "ASC" : "DESC" + " " + "LIMIT ? OFFSET ?");
+
+
 
         try {
             const queryResult = await excuteQuery({
-                query: "SELECT * FROM `posts` WHERE " + fieldname + " = ?",
-                values: [value]
+                query: dbQuery,
+                values: [value, limit, offset]
             }) as any;
 
             response.success = true;
@@ -116,6 +113,27 @@ class PostQueries implements IPostQueries {
             console.error(e);
             return new ReqResponse<Array<PostRowData>>(false, "ERRCODE_UNKNOWN", null);
         }
+    }
+
+    IsColumnNameValid(columnname: string): boolean {
+        switch (columnname) {
+            case "id":
+                break;
+            case "authorid":
+                break;
+            case "title":
+                break;
+            case "slug":
+                break;
+            case "lastedit_time":
+                break;
+            case "create_time":
+                break;
+            default:
+                return false;
+        }
+
+        return true;
     }
 }
 

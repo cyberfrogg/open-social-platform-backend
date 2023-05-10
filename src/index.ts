@@ -20,7 +20,7 @@ import UserGetByNickname from './routes/api/v1/user/getbynickname';
 import IRoute from './utils/backend/IRoute';
 import PostCreate from './routes/api/v1/post/create';
 import { PostQueries } from './utils/backend/queries/postqueries';
-import PostGetById from './routes/api/v1/post/getpostbyid';
+import PostGetBy from './routes/api/v1/post/getpostby';
 
 const app = express();
 app.use(express.json());
@@ -54,7 +54,7 @@ const InitializeApp = async () => {
     routes.push(new UserGetByNickname("/api/v1/user/getuserbynickname", databaseQueries));
 
     routes.push(new PostCreate("/api/v1/post/create", databaseQueries));
-    routes.push(new PostGetById("/api/v1/post/getbyid", databaseQueries));
+    routes.push(new PostGetBy("/api/v1/post/getby", databaseQueries));
 
 
     // initialize routes
