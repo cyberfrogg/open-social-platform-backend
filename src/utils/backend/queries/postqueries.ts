@@ -97,6 +97,8 @@ class PostQueries implements IPostQueries {
                 let newItem = new PostRowData(
                     item.id,
                     item.authorid,
+                    item.title,
+                    item.slug,
                     content,
                     lastEditTimeDate,
                     createTimeDate
