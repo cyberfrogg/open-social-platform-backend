@@ -4,6 +4,8 @@ import DatabaseQueries from "../../../../utils/backend/DatabaseQueries";
 import ReqResponse from '../../../../data/shared/reqResponse';
 import { GetPostNodesCount, SanitizePostContent } from "../../../../utils/shared/postUtils";
 import PostContentData from '../../../../data/shared/postcontent/postContentData';
+import IsFieldValid from '../../../../utils/shared/fieldvalidation';
+import { TextToSlug } from "../../../../utils/shared/stringutils";
 
 
 class PostCreate implements IRoute {
@@ -24,10 +26,18 @@ class PostCreate implements IRoute {
     Execute = async (req: Request, res: Response) => {
         // retrieve fields
         const reqUserToken = req.body.token;
+        const reqUserTitle = req.body.title;
         const reqPostContentRaw = req.body.postContentData;
 
         if (reqUserToken == null || reqUserToken == "" || reqPostContentRaw == null) {
             res.json(new ReqResponse(false, "ERRVALID_CANTBENULL", null))
+            return;
+        }
+
+        const titleValidationResponse = IsFieldValid(reqUserTitle, "postTitle");
+        if (!titleValidationResponse.success) {
+            res.json(new ReqResponse(false, titleValidationResponse.message, null))
+            return;
         }
 
         // check if user token is valid
@@ -61,14 +71,24 @@ class PostCreate implements IRoute {
             return;
         }
 
+        // generate slug for title
+        const titleSlug = TextToSlug(reqUserTitle);
+
         // insert post
-        const postInsertResult = await this.databaseQueries.PostQueries.CreatePost(userId, sanitizedPostContent);
+        const postInsertResult = await this.databaseQueries.PostQueries.CreatePost(userId, reqUserTitle, titleSlug, sanitizedPostContent);
         if (!postInsertResult.success || postInsertResult.data == 0) {
             res.json(postInsertResult);
             return;
         }
 
-        res.json(new ReqResponse(true, "", postInsertResult.data))
+        // get inserted post
+        const insertedPostData = await this.databaseQueries.PostQueries.GetPostsBy("id", postInsertResult.data, "id", false, 1, 0);
+        if (!insertedPostData.success || insertedPostData.data.length == 0) {
+            res.json(new ReqResponse(false, "ERRCODE_UNKNOWN", null));
+            return;
+        }
+
+        res.json(new ReqResponse(true, "", insertedPostData.data[0]))
     }
 }
 

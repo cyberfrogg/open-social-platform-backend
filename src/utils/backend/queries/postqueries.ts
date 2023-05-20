@@ -6,7 +6,7 @@ import PostRowData from '../../../data/post/postrowdata';
 
 interface IPostQueries extends IDatabaseQueryCollection {
     Initialize(): Promise<void>;
-    CreatePost(authorId: number, content: PostContentData): Promise<ReqResponse<number>>;
+    CreatePost(authorId: number, title: string, slug: string, content: PostContentData): Promise<ReqResponse<number>>;
     GetPostsBy(columnname: string, value: string | number, orderByFieldname: string, isReverseOrder: boolean, limit: number, offset: number): Promise<ReqResponse<Array<PostRowData>>>;
 }
 
@@ -17,7 +17,7 @@ class PostQueries implements IPostQueries {
         return Promise.resolve();
     }
 
-    async CreatePost(authorId: number, content: PostContentData): Promise<ReqResponse<number>> {
+    async CreatePost(authorId: number, title: string, slug: string, content: PostContentData): Promise<ReqResponse<number>> {
         let response = new ReqResponse<number>(false, "");
 
         // parse object to json (try catch for fail catch)
@@ -33,8 +33,8 @@ class PostQueries implements IPostQueries {
         // INSERT row 
         try {
             const queryResult = await excuteQuery({
-                query: "INSERT INTO posts (authorid, content) VALUES(?, ?)",
-                values: [authorId, contentJson]
+                query: "INSERT INTO posts (authorid, title, slug, content) VALUES(?, ?, ?, ?)",
+                values: [authorId, title, slug, contentJson]
             }) as any;
 
             if (queryResult == undefined || queryResult.insertId == undefined) {

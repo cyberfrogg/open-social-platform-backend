@@ -12,4 +12,10 @@ const HashStringWithSalt = (value: string, salt: string) => {
     return HashString(salt + value);
 }
 
-export { GenerateRandomString, HashString, HashStringWithSalt }
+const TextToSlug = (value: string): string => {
+    return value.toLowerCase()
+        .replace(/ /g, '-')
+        .replace(/[^\w-]+/g, '');
+}
+
+export { GenerateRandomString, HashString, HashStringWithSalt, TextToSlug }
