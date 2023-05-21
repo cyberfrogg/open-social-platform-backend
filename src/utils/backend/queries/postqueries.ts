@@ -8,6 +8,7 @@ interface IPostQueries extends IDatabaseQueryCollection {
     Initialize(): Promise<void>;
     CreatePost(authorId: number, title: string, slug: string, content: PostContentData): Promise<ReqResponse<number>>;
     GetPostsBy(columnname: string, value: string | number, orderByFieldname: string, isReverseOrder: boolean, limit: number, offset: number): Promise<ReqResponse<Array<PostRowData>>>;
+    GetPosts(orderByFieldname: string, isReverseOrder: boolean, limit: number, offset: number): Promise<ReqResponse<Array<PostRowData>>>;
 }
 
 class PostQueries implements IPostQueries {
@@ -69,6 +70,70 @@ class PostQueries implements IPostQueries {
             const queryResult = await excuteQuery({
                 query: dbQuery,
                 values: [value, limit, offset]
+            }) as any;
+
+            response.success = true;
+
+            // fetch to array
+            let result = new Array<PostRowData>();
+            for (let i = 0; i < queryResult.length; i++) {
+                const item = queryResult[i];
+
+                // parse json to object
+                let content: PostContentData = null;
+                try {
+                    content = JSON.parse(item.content);
+                    if (content == undefined || content == null) {
+                        return new ReqResponse<Array<PostRowData>>(false, "ERRCODE_METAVALUE_JSON_FAIL");
+                    }
+                }
+                catch (je) {
+                    console.error(je);
+                    return new ReqResponse<Array<PostRowData>>(false, "ERRCODE_METAVALUE_JSON_FAIL");
+                }
+
+                // create PostRowData
+                let createTimeDate = new Date(item.create_time);
+                let lastEditTimeDate = new Date(item.lastedit_time);
+                let newItem = new PostRowData(
+                    item.id,
+                    item.authorid,
+                    item.title,
+                    item.slug,
+                    content,
+                    lastEditTimeDate,
+                    createTimeDate
+                );
+
+                result.push(newItem);
+            }
+
+            response.data = result;
+            response.success = true;
+            return response;
+        }
+        catch (e) {
+            console.error(e);
+            return new ReqResponse<Array<PostRowData>>(false, "ERRCODE_UNKNOWN", null);
+        }
+    }
+
+    async GetPosts(orderByFieldname: string, isReverseOrder: boolean, limit: number, offset: number): Promise<ReqResponse<Array<PostRowData>>> {
+        let response = new ReqResponse<Array<PostRowData>>(false, "", new Array<PostRowData>());
+
+        // prevent mysql injection. i think
+        if (!this.IsColumnNameValid(orderByFieldname)) {
+            return new ReqResponse<Array<PostRowData>>(false, "ERRCODE_INVALID_KEY");
+        }
+
+        // construct query
+        const dbQuery = "SELECT * FROM `posts` ORDER BY " + orderByFieldname + " " + (isReverseOrder ? "ASC" : "DESC" + " " + "LIMIT ? OFFSET ?");
+
+
+        try {
+            const queryResult = await excuteQuery({
+                query: dbQuery,
+                values: [limit, offset]
             }) as any;
 
             response.success = true;

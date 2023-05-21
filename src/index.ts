@@ -21,6 +21,7 @@ import IRoute from './utils/backend/IRoute';
 import PostCreate from './routes/api/v1/post/create';
 import { PostQueries } from './utils/backend/queries/postqueries';
 import PostGetBy from './routes/api/v1/post/getpostby';
+import FeedGet from './routes/api/v1/feed/get';
 
 const app = express();
 app.use(express.json());
@@ -55,6 +56,8 @@ const InitializeApp = async () => {
 
     routes.push(new PostCreate("/api/v1/post/create", databaseQueries));
     routes.push(new PostGetBy("/api/v1/post/getby", databaseQueries));
+
+    routes.push(new FeedGet("/api/v1/feed/get", databaseQueries));
 
 
     // initialize routes
