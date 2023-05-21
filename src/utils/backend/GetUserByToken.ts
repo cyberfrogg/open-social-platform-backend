@@ -8,7 +8,7 @@ const GetUserByToken = async (token: string, dbQueries: DatabaseQueries): Promis
     }
 
     const sessionResponse = await dbQueries.SessionQueries.GetSessionByToken(token);
-    if (!sessionResponse.success) {
+    if (!sessionResponse.success || sessionResponse.data == null) {
         return new ReqResponse<UserRowData>(false, sessionResponse.message, null);
     }
 

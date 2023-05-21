@@ -28,7 +28,7 @@ class FeedGet implements IRoute {
         const reqFieldWatchedPostsOffset = req.body.watchedpostsoffset;
 
         if (!Number.isInteger(reqFieldWatchedPostsOffset)) {
-            res.json(new ReqResponse(false, "ERRCODE_INVALID_FIELD", null));
+            res.json(new ReqResponse(false, "ERRCODE_INVALID_FIELD", new Array<PostRowData>()));
             return;
         }
 
