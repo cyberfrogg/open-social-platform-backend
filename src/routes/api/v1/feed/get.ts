@@ -43,6 +43,11 @@ class FeedGet implements IRoute {
             posts = await this.GetGenericPosts(reqFieldWatchedPostsOffset);
         }
 
+        if (posts.length == 0) {
+            res.json(new ReqResponse(false, "ERRCODE_POST_NOT_FOUND", new Array<PostRowData>()));
+            return;
+        }
+
         res.json(new ReqResponse(true, "", posts));
     }
 
@@ -55,7 +60,7 @@ class FeedGet implements IRoute {
     GetGenericPosts = async (watchedPosts: number): Promise<PostRowData[]> => {
         let posts = new Array<PostRowData>();
 
-        const postsResponse = await this.databaseQueries.PostQueries.GetPosts("create_time", false, 10, watchedPosts);
+        const postsResponse = await this.databaseQueries.PostQueries.GetPosts("create_time", false, 5, watchedPosts);
 
         if (!postsResponse.success || postsResponse.data.length == 0) {
             return posts;
