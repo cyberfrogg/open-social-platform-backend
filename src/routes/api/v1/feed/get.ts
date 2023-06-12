@@ -31,7 +31,6 @@ class FeedGet implements IRoute {
             res.json(new ReqResponse(false, "ERRCODE_INVALID_FIELD", new Array<PostRowData>()));
             return;
         }
-
         const user = await GetUserByToken(reqFieldToken, this.databaseQueries);
         const isUserLoggedIn = !user.success || user.data == null;
 
@@ -42,7 +41,6 @@ class FeedGet implements IRoute {
         else {
             posts = await this.GetGenericPosts(reqFieldWatchedPostsOffset);
         }
-
         if (posts.length == 0) {
             res.json(new ReqResponse(false, "ERRCODE_POST_NOT_FOUND", new Array<PostRowData>()));
             return;
