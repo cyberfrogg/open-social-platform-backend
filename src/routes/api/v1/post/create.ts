@@ -6,17 +6,20 @@ import { GetPostNodesCount, SanitizePostContent } from "../../../../utils/shared
 import PostContentData from '../../../../data/shared/postcontent/postContentData';
 import IsFieldValid from '../../../../utils/shared/fieldvalidation';
 import { TextToSlug } from "../../../../utils/shared/stringutils";
+import IImageUplaoder from "../../../../utils/backend/imageuploader/IImageUploader";
 
 
 class PostCreate implements IRoute {
     readonly path: string;
     readonly maxNodesPerPost: number;
     readonly databaseQueries: DatabaseQueries;
+    readonly imageUploader: IImageUplaoder;
 
-    constructor(path: string, databaseQueries: DatabaseQueries) {
+    constructor(path: string, databaseQueries: DatabaseQueries, imageUploader: IImageUplaoder) {
         this.path = path;
         this.databaseQueries = databaseQueries;
         this.maxNodesPerPost = Number(process.env.POSTS_MAX_NODES);
+        this.imageUploader = imageUploader;
     }
 
     async Initialize(expressApp: Express): Promise<void> {

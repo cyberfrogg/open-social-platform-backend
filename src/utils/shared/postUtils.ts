@@ -5,6 +5,7 @@ import PostContentNodeImageData from '../../data/shared/postcontent/nodes/PostCo
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import PostContentNodeTextData from '../../data/shared/postcontent/nodes/PostContentNodeTextData';
 import PostContentNodeLinkData from '../../data/shared/postcontent/nodes/PostContentNodeLinkData';
+import IImageUplaoder from '../backend/imageuploader/IImageUploader';
 
 const GetPostNodesCount = (postContentData: PostContentData): number => {
     let count = 0;
@@ -68,8 +69,12 @@ const SanitizePostContent = (rawPostContentData: PostContentData): PostContentDa
                     let newImageNode = new PostContentNodeImageData(
                         node.type,
                         SanitizeText(oldImageNode.description),
-                        sanitizeUrl(oldImageNode.url)
+                        sanitizeUrl(oldImageNode.url),
+                        0,
+                        0
                     );
+                    newImageNode.assetUuid = oldImageNode.assetUuid;
+
                     postContentData.nodes.push(newImageNode);
                 }
                 catch (e) {

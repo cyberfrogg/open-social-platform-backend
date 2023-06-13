@@ -22,6 +22,8 @@ import PostCreate from './routes/api/v1/post/create';
 import { PostQueries } from './utils/backend/queries/postqueries';
 import PostGetBy from './routes/api/v1/post/getpostby';
 import FeedGet from './routes/api/v1/feed/get';
+import ImgstazImageUpload from './utils/backend/imageuploader/impl/ImgstazImageUploader';
+import ImgstazImageUploaderConfig from './utils/backend/imageuploader/impl/ImgstazImageUploaderConfig';
 
 const app = express();
 app.use(express.json());
@@ -41,6 +43,14 @@ const InitializeApp = async () => {
     let databaseQueries = new DatabaseQueries(databaseQueriesList);
     await databaseQueries.Initialize();
 
+    // create image uploader
+    const imageUploaderConfig = new ImgstazImageUploaderConfig(
+        process.env.IMGSTAZ_PROJECT_UUID,
+        process.env.IMGSTAZ_PROJECT_TOKEN,
+        process.env.IMGSTAZ_ENDPOINT
+    );
+    const imageUploader = new ImgstazImageUpload(imageUploaderConfig);
+
 
     // instantiate routes
     let routes = new Array<IRoute>();
@@ -54,7 +64,7 @@ const InitializeApp = async () => {
     routes.push(new UserGetNickname("/api/v1/user/getnickname", databaseQueries));
     routes.push(new UserGetByNickname("/api/v1/user/getuserbynickname", databaseQueries));
 
-    routes.push(new PostCreate("/api/v1/post/create", databaseQueries));
+    routes.push(new PostCreate("/api/v1/post/create", databaseQueries, imageUploader));
     routes.push(new PostGetBy("/api/v1/post/getby", databaseQueries));
 
     routes.push(new FeedGet("/api/v1/feed/get", databaseQueries));
