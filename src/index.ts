@@ -24,6 +24,8 @@ import PostGetBy from './routes/api/v1/post/getpostby';
 import FeedGet from './routes/api/v1/feed/get';
 import ImgstazImageUpload from './utils/backend/imageuploader/impl/ImgstazImageUploader';
 import ImgstazImageUploaderConfig from './utils/backend/imageuploader/impl/ImgstazImageUploaderConfig';
+import { UtilsQueries } from './utils/backend/queries/utilsqueries';
+import { UserAssetsQueries } from './utils/backend/queries/userassetsqueries';
 
 const app = express();
 app.use(express.json());
@@ -37,8 +39,10 @@ const InitializeApp = async () => {
     let databaseQueriesList = new Array<IDatabaseQueryCollection>();
     databaseQueriesList.push(new UserQueries());
     databaseQueriesList.push(new UserMetaQueries());
+    databaseQueriesList.push(new UserAssetsQueries());
     databaseQueriesList.push(new SessionQueries());
     databaseQueriesList.push(new PostQueries());
+    databaseQueriesList.push(new UtilsQueries());
 
     let databaseQueries = new DatabaseQueries(databaseQueriesList);
     await databaseQueries.Initialize();
