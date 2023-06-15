@@ -1,7 +1,7 @@
 import IDatabaseQueryCollection from "../IDatabaseQueryCollection";
 import ReqResponse from "../../../data/shared/reqResponse";
 import { excuteQuery } from "../mysqldb";
-import UserAssetsRowData from "../../../data/userassets/userassetsrowdata";
+import UserAssetsRowData from "../../../data/user/assets/userassetsrowdata";
 
 interface IUserAssetsQueries extends IDatabaseQueryCollection {
     Initialize(): Promise<void>;

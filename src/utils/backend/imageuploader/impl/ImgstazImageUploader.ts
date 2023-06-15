@@ -15,13 +15,19 @@ class ImgstazImageUpload implements IImageUplaoder {
         try {
             const formData = new FormData();
             formData.append("uploadfile", new Blob([buffer]), "uploadfileanyext");
-            formData.append("token", this.config.projectToken);
+            formData.append("projecttoken", this.config.projectToken);
 
-            const endpoint = process.env.IMGSTAZ_ENDPOINT + "image/uplaod"
+            const endpoint = process.env.IMGSTAZ_ENDPOINT + "image/upload"
             const response = await fetch(endpoint, { method: "POST", body: formData });
 
+            if (response.status == 404) {
+                console.error("Failed to find api request page. Trying access endpoint: " + endpoint);
+                return ReqResponse.Fail("ERRCODE_UNKNOWN");
+            }
             if (response.status != 200) {
                 console.error("Failed to complete request. Error: " + response.status + " msg: " + response.statusText);
+                const parsedJson = await response.json();
+                console.error(parsedJson);
                 return ReqResponse.Fail("ERRCODE_UNKNOWN");
             }
 
@@ -39,7 +45,7 @@ class ImgstazImageUpload implements IImageUplaoder {
             return ReqResponse.Success(data);
         }
         catch (e) {
-            console.error("Failed to upload image by base64. Error: ");
+            console.error("Failed to upload image. Error: ");
             console.error(e);
         }
 

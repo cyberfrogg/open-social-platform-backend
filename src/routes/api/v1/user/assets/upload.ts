@@ -1,9 +1,9 @@
 import { Express, Request, Response } from "express";
-import IRoute from "../../../../utils/backend/IRoute";
-import DatabaseQueries from "../../../../utils/backend/DatabaseQueries";
-import ReqResponse from '../../../../data/shared/reqResponse';
-import IImageUplaoder from "../../../../utils/backend/imageuploader/IImageUploader";
-import { getContentBufferFromUploadedFile, getImageExtension, getUploadFileFromRequest } from "../../../../utils/backend/fileUtils";
+import IRoute from "../../../../../utils/backend/IRoute";
+import DatabaseQueries from "../../../../../utils/backend/DatabaseQueries";
+import ReqResponse from '../../../../../data/shared/reqResponse';
+import IImageUplaoder from "../../../../../utils/backend/imageuploader/IImageUploader";
+import { getContentBufferFromUploadedFile, getImageExtension, getUploadFileFromRequest } from "../../../../../utils/backend/fileUtils";
 
 
 // todo: support multiple asset types. like video. only images and gifs are supported now.
@@ -27,9 +27,8 @@ class AssetsUpload implements IRoute {
     Execute = async (req: Request, res: Response) => {
         // retrieve fields
         const reqUserToken = req.body.token;
-        const reqPostContentRaw = req.body.postContentData;
 
-        if (reqUserToken == null || reqUserToken == "" || reqPostContentRaw == null) {
+        if (reqUserToken == null || reqUserToken == "") {
             res.json(new ReqResponse(false, "ERRVALID_CANTBENULL", null))
             return;
         }
@@ -59,9 +58,11 @@ class AssetsUpload implements IRoute {
             return;
         }
 
-        // upload image first
+        // upload image
         const uploadResponse = await this.imageUploader.UploadImage(fileBinary);
         if (!uploadResponse.success) {
+            console.error("Failed to upload image. Response:");
+            console.error(uploadResponse);
             res.json(ReqResponse.Fail("ERRCODE_UPLOAD_FAILED"));
             return;
         }
@@ -83,6 +84,7 @@ class AssetsUpload implements IRoute {
             return;
         }
 
+        console.log("update created row data")
         // update created row data
         const updateRowResponse = await this.databaseQueries.UserAssetsQueries.UpdateAfterUpload(
             nextRowUUidResponse.data,
@@ -94,7 +96,7 @@ class AssetsUpload implements IRoute {
             return;
         }
 
-        res.json(ReqResponse.Success(updateRowResponse));
+        res.json(ReqResponse.Success(uploadResponse.data));
     }
 }
 

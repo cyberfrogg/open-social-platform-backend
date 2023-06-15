@@ -26,12 +26,22 @@ import ImgstazImageUpload from './utils/backend/imageuploader/impl/ImgstazImageU
 import ImgstazImageUploaderConfig from './utils/backend/imageuploader/impl/ImgstazImageUploaderConfig';
 import { UtilsQueries } from './utils/backend/queries/utilsqueries';
 import { UserAssetsQueries } from './utils/backend/queries/userassetsqueries';
+import AssetsUpload from './routes/api/v1/user/assets/upload';
+import fileUpload from 'express-fileupload';
+
+const maxFileSize = Number(process.env.MAX_FILE_SIZE);
 
 const app = express();
-app.use(express.json());
+
+
 app.use(cors({
     origin: process.env.WEBSITE_CORS_URL
 }));
+app.use(fileUpload({
+    abortOnLimit: false,
+    limits: { fileSize: maxFileSize * 1024 * 1024 },
+}));
+app.use(express.json());
 
 
 const InitializeApp = async () => {
@@ -56,6 +66,7 @@ const InitializeApp = async () => {
     const imageUploader = new ImgstazImageUpload(imageUploaderConfig);
 
 
+
     // instantiate routes
     let routes = new Array<IRoute>();
     routes.push(new Ping("/api/v1/ping"));
@@ -67,6 +78,8 @@ const InitializeApp = async () => {
     routes.push(new UserResetPasswordComplete("/api/v1/user/auth/resetpasswordcomplete", databaseQueries));
     routes.push(new UserGetNickname("/api/v1/user/getnickname", databaseQueries));
     routes.push(new UserGetByNickname("/api/v1/user/getuserbynickname", databaseQueries));
+
+    routes.push(new AssetsUpload("/api/v1/user/assets/upload", databaseQueries, imageUploader));
 
     routes.push(new PostCreate("/api/v1/post/create", databaseQueries, imageUploader));
     routes.push(new PostGetBy("/api/v1/post/getby", databaseQueries));
@@ -83,6 +96,7 @@ const InitializeApp = async () => {
     // handle all other errors
     app.use((err, req, res, next) => {
         if (err instanceof SyntaxError && 'body' in err) {
+            console.error("Unhandled exception dropped. Message:");
             console.error(err);
             return res.json(new ReqResponse(false, "ERRCODE_UNKNOWN", null));
         }
