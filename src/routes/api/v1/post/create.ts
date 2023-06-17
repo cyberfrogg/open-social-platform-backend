@@ -2,7 +2,7 @@ import { Express, Request, Response } from "express";
 import IRoute from "../../../../utils/backend/IRoute";
 import DatabaseQueries from "../../../../utils/backend/DatabaseQueries";
 import ReqResponse from '../../../../data/shared/reqResponse';
-import { GetPostNodesCount, SanitizePostContent } from "../../../../utils/shared/postUtils";
+import { GetPostNodesCount, PrepareUserUploadedAssets, SanitizePostContent } from "../../../../utils/shared/postUtils";
 import PostContentData from '../../../../data/shared/postcontent/postContentData';
 import IsFieldValid from '../../../../utils/shared/fieldvalidation';
 import { TextToSlug } from "../../../../utils/shared/stringutils";
@@ -74,11 +74,21 @@ class PostCreate implements IRoute {
             return;
         }
 
+        let contentWithFiltredUserAssets: PostContentData;
+        try {
+            contentWithFiltredUserAssets = await PrepareUserUploadedAssets(sanitizedPostContent, this.databaseQueries.UserAssetsQueries);
+        }
+        catch (e) {
+            console.error("Failed to filter uploaded user assets. Message: " + e.message);
+            res.json(new ReqResponse(false, "ERRCODE_SANITIZE", null));
+            return;
+        }
+
         // generate slug for title
         const titleSlug = TextToSlug(reqUserTitle);
 
         // insert post
-        const postInsertResult = await this.databaseQueries.PostQueries.CreatePost(userId, reqUserTitle, titleSlug, sanitizedPostContent);
+        const postInsertResult = await this.databaseQueries.PostQueries.CreatePost(userId, reqUserTitle, titleSlug, contentWithFiltredUserAssets);
         if (!postInsertResult.success || postInsertResult.data == 0) {
             res.json(postInsertResult);
             return;

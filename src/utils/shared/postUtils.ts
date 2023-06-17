@@ -6,6 +6,8 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import PostContentNodeTextData from '../../data/shared/postcontent/nodes/PostContentNodeTextData';
 import PostContentNodeLinkData from '../../data/shared/postcontent/nodes/PostContentNodeLinkData';
 import IImageUplaoder from '../backend/imageuploader/IImageUploader';
+import { IUserAssetsQueries } from '../backend/queries/userassetsqueries';
+import ImageUploadData from '../backend/imageuploader/ImageUploadData';
 
 const GetPostNodesCount = (postContentData: PostContentData): number => {
     let count = 0;
@@ -68,14 +70,16 @@ const SanitizePostContent = (rawPostContentData: PostContentData): PostContentDa
                     let oldImageNode = node as PostContentNodeImageData;
                     let newImageNode = new PostContentNodeImageData(
                         node.type,
+                        oldImageNode.assetUuid,
                         SanitizeText(oldImageNode.description),
-                        sanitizeUrl(oldImageNode.url),
+                        "",
                         0,
                         0
                     );
                     newImageNode.assetUuid = oldImageNode.assetUuid;
 
-                    postContentData.nodes.push(newImageNode);
+                    if (newImageNode.assetUuid != "")
+                        postContentData.nodes.push(newImageNode);
                 }
                 catch (e) {
                     console.error("Failed to sanitize post content at node. Message" + e.message);
@@ -85,6 +89,50 @@ const SanitizePostContent = (rawPostContentData: PostContentData): PostContentDa
                 break;
         }
     });
+
+    return postContentData;
+}
+
+const PrepareUserUploadedAssets = async (rawPostContentData: PostContentData, queries: IUserAssetsQueries): Promise<PostContentData | null> => {
+    let postContentData = new PostContentData();
+    postContentData.nodes = new Array<IPostContentNodeData>();
+
+    for (let i = 0; i < rawPostContentData.nodes.length; i++) {
+        const node = rawPostContentData.nodes[i];
+        switch (node.type) {
+            case "image":
+                try {
+                    let oldImageNode = node as PostContentNodeImageData;
+                    let imageRowResponse = await queries.GetAssetByUuid(oldImageNode.assetUuid);
+
+                    if (imageRowResponse.success && imageRowResponse.data.AssetType == "image") {
+                        const imageRowContent = JSON.parse(imageRowResponse.data.Content) as ImageUploadData;
+                        let newImageNode = new PostContentNodeImageData(
+                            node.type,
+                            oldImageNode.assetUuid,
+                            SanitizeText(oldImageNode.description),
+                            imageRowContent.url,
+                            imageRowContent.width,
+                            imageRowContent.height
+                        );
+                        newImageNode.assetUuid = oldImageNode.assetUuid;
+
+                        postContentData.nodes.push(newImageNode);
+                    } else {
+                        console.error("Failed to get image asset. Response: ");
+                        console.error(imageRowResponse);
+                    }
+                }
+                catch (e) {
+                    console.error("Failed to setup image. Message: ");
+                    console.error(e);
+                }
+                break;
+            default:
+                postContentData.nodes.push(node);
+                break;
+        }
+    }
 
     return postContentData;
 }
@@ -105,4 +153,4 @@ const SanitizeText = (rawText: string): string => {
     return rawText.replace(reg, (match) => (map[match]));
 }
 
-export { GetPostNodesCount, SanitizePostContent }
+export { GetPostNodesCount, SanitizePostContent, PrepareUserUploadedAssets }

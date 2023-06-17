@@ -4,6 +4,7 @@ import DatabaseQueries from "../../../../../utils/backend/DatabaseQueries";
 import ReqResponse from '../../../../../data/shared/reqResponse';
 import IImageUplaoder from "../../../../../utils/backend/imageuploader/IImageUploader";
 import { getContentBufferFromUploadedFile, getImageExtension, getUploadFileFromRequest } from "../../../../../utils/backend/fileUtils";
+import ImageUploadData from "../../../../../utils/backend/imageuploader/ImageUploadData";
 
 
 // todo: support multiple asset types. like video. only images and gifs are supported now.
@@ -99,7 +100,13 @@ class AssetsUpload implements IRoute {
             return;
         }
 
-        res.json(ReqResponse.Success(uploadResponse.data));
+        // just swap uuid's for our owns instead of imgstaz uploaded
+        const responseData = new ImageUploadData();
+        responseData.imageUuid = nextRowUUidResponse.data;
+        responseData.height = uploadResponse.data.height;
+        responseData.width = uploadResponse.data.width;
+        responseData.url = uploadResponse.data.url;
+        res.json(ReqResponse.Success(responseData));
     }
 }
 

@@ -8,8 +8,9 @@ class PostContentNodeImageData implements IPostContentNodeData {
     width: number = 0;
     height: number = 0;
 
-    constructor(type: string, description: string, url: string, width: number, height: number) {
+    constructor(type: string, assetUuid: string, description: string, url: string, width: number, height: number) {
         this.type = type;
+        this.assetUuid = assetUuid;
         this.description = description;
         this.url = url;
         this.width = width;
