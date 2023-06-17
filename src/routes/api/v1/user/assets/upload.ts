@@ -8,6 +8,8 @@ import { getContentBufferFromUploadedFile, getImageExtension, getUploadFileFromR
 
 // todo: support multiple asset types. like video. only images and gifs are supported now.
 class AssetsUpload implements IRoute {
+    readonly rateLimitRangeDays: number = Number.parseInt(process.env.FILE_UPLOAD_RATE_LIMIT_RANGE_DAYS);
+    readonly rateLimitMaxRatePerRage: number = Number.parseInt(process.env.FILE_UPLOAD_RATE_LIMIT_PER_RANGE);
     readonly path: string;
     readonly maxNodesPerPost: number;
     readonly databaseQueries: DatabaseQueries;
@@ -40,6 +42,17 @@ class AssetsUpload implements IRoute {
             return;
         }
         const userId = sessionRow.data.UserId;
+
+        // check if user is rate limited to upload assets
+        const isRateLimitedResponse = await this.databaseQueries.UserAssetsQueries.IsRateLimited(
+            userId,
+            this.rateLimitMaxRatePerRage,
+            this.rateLimitRangeDays
+        )
+        if (isRateLimitedResponse.data) {
+            res.json(ReqResponse.Fail("ERRCODE_RATE_LIMITED"));
+            return;
+        }
 
         // validate if file even uploaded
         const uploadedFile = getUploadFileFromRequest(req);
@@ -75,23 +88,13 @@ class AssetsUpload implements IRoute {
         }
 
         // create row
-        const createRowResponse = await this.databaseQueries.UserAssetsQueries.CreateEmpty(
+        const createRowResponse = await this.databaseQueries.UserAssetsQueries.Create(
             nextRowUUidResponse.data,
-            userId
-        );
-        if (!createRowResponse.success) {
-            res.json(ReqResponse.Fail("ERRCODE_UNKNOWN"));
-            return;
-        }
-
-        console.log("update created row data")
-        // update created row data
-        const updateRowResponse = await this.databaseQueries.UserAssetsQueries.UpdateAfterUpload(
-            nextRowUUidResponse.data,
+            userId,
             "image",
             JSON.stringify(uploadResponse.data)
         );
-        if (!updateRowResponse.success) {
+        if (!createRowResponse.success) {
             res.json(ReqResponse.Fail("ERRCODE_UNKNOWN"));
             return;
         }

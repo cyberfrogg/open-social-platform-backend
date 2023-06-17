@@ -5,45 +5,50 @@ import UserAssetsRowData from "../../../data/user/assets/userassetsrowdata";
 
 interface IUserAssetsQueries extends IDatabaseQueryCollection {
     Initialize(): Promise<void>;
-    CreateEmpty(newUuid: string, userId: number): Promise<ReqResponse<string>>;
-    UpdateAfterUpload(rowUuid: string, newAssetType: string, newContent: string): Promise<ReqResponse<undefined>>;
+    Create(newUuid: string, userId: number, assetType: string, content: string): Promise<ReqResponse<UserAssetsRowData>>;
+    IsRateLimited(userId: number, timespanInDays: number, rateLimit: number): Promise<ReqResponse<boolean>>;
 }
 
 class UserAssetsQueries implements IUserAssetsQueries {
-
     readonly Name: string = "UserAssetsQueries";
 
     Initialize(): Promise<void> {
         return Promise.resolve();
     }
 
-    CreateEmpty = async (newUuid: string, userId: number): Promise<ReqResponse<string>> => {
-        let response = new ReqResponse<string>(false, "");
-
+    Create = async (newUuid: string, userId: number, assetType: string, content: string): Promise<ReqResponse<UserAssetsRowData>> => {
         try {
-            await excuteQuery({
-                query: "INSERT INTO `users` (`uuid`, `userid`) VALUES (?, ?);",
-                values: [newUuid, userId]
+            const result = await excuteQuery({
+                query: "INSERT INTO `user_assets` (`uuid`, `userid`, `assettype`, `content`) VALUES (?, ?, ?, ?);",
+                values: [newUuid, userId, assetType, content]
             }) as any;
 
-            response.data = newUuid;
-            response.success = true;
-            return response;
+            if (result.affectedRows == undefined || result.affectedRows == 0) {
+                return ReqResponse.Fail("ERRCODE_UNKNOWN");
+            }
+
+            let data = new UserAssetsRowData(newUuid, userId, assetType, content, null);
+            return ReqResponse.Success(data);
         }
         catch (e) {
             console.error(e);
-            return new ReqResponse<string>(false, "ERRCODE_UNKNOWN");
+            return ReqResponse.Fail("ERRCODE_UNKNOWN");
         }
     }
 
-    UpdateAfterUpload = async (rowUuid: string, newAssetType: string, newContent: string): Promise<ReqResponse<undefined>> => {
+    IsRateLimited = async (userId: number, timespanInDays: number, rateLimit: number): Promise<ReqResponse<boolean>> => {
         try {
-            await excuteQuery({
-                query: "UPDATE `users_meta` SET assettype=? content=? WHERE userid=?",
-                values: [newAssetType, newContent, rowUuid]
+            const result = await excuteQuery({
+                query: "SELECT COUNT(*) FROM user_assets WHERE userid = ? AND create_time >= DATE_SUB(CURDATE(), INTERVAL ? DAY);",
+                values: [userId, timespanInDays]
             }) as any;
 
-            return ReqResponse.Success();
+            const rowsCount = Number.parseInt(result['COUNT(*)']);
+            if (rowsCount == Number.NaN || rowsCount == null || rowsCount == undefined) {
+                return ReqResponse.Fail("ERRCODE_UNKNOWN");
+            }
+
+            return ReqResponse.Success(rowsCount >= rateLimit);
         }
         catch (e) {
             console.error(e);
