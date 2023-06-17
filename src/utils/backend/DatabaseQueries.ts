@@ -1,7 +1,10 @@
 import IDatabaseQueryCollection from "./IDatabaseQueryCollection";
+import { IPostQueries } from "./queries/postqueries";
 import { ISessionQueries } from "./queries/sessionqueries";
+import { IUserAssetsQueries } from "./queries/userassetsqueries";
 import { IUserMetaQueries } from "./queries/usermetaqueries";
 import { IUserQueries } from "./queries/userqueries";
+import { IUtilsQueries } from "./queries/utilsqueries";
 
 type DatabaseQueryCollectionType = IDatabaseQueryCollection;
 
@@ -11,7 +14,10 @@ class DatabaseQueries {
 
     readonly UserQueries: IUserQueries;
     readonly UserMetaQueries: IUserMetaQueries;
+    readonly UserAssetsQueries: IUserAssetsQueries;
     readonly SessionQueries: ISessionQueries;
+    readonly PostQueries: IPostQueries;
+    readonly UtilsQueries: IUtilsQueries;
 
     constructor(queryList: Array<IDatabaseQueryCollection>) {
         this.AllQueries = queryList;
@@ -26,8 +32,17 @@ class DatabaseQueries {
                 case "UserMetaQueries":
                     this.UserMetaQueries = queryCollection as IUserMetaQueries;
                     break;
+                case "UserAssetsQueries":
+                    this.UserAssetsQueries = queryCollection as IUserAssetsQueries;
+                    break;
                 case "SessionQueries":
                     this.SessionQueries = queryCollection as ISessionQueries;
+                    break;
+                case "PostQueries":
+                    this.PostQueries = queryCollection as IPostQueries;
+                    break;
+                case "UtilsQueries":
+                    this.UtilsQueries = queryCollection as IUtilsQueries;
                     break;
                 default:
                     break;

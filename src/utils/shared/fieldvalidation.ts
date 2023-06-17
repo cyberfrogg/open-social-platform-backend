@@ -9,6 +9,8 @@ const EMAIL_REGEX_TEST = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(
 
 const PASSWORD_RANGE = new RangeVal(8, 50);
 
+const POSTTITLE_RANGE = new RangeVal(2, 200);
+
 const IsFieldValid = (value: any, type: string) => {
     try {
         switch (type) {
@@ -28,6 +30,10 @@ const IsFieldValid = (value: any, type: string) => {
                 return validateIsNotEmptyField(value);
             case "userid":
                 return validateIsNotEmptyField(value);
+            case "postid":
+                return validateIsNotEmptyField(value);
+            case "postTitle":
+                return validatePostTitle(value);
             default:
                 return new ReqResponse(false, "ERRCODE_VALIDATION_NO_TYPE", null);
         }
@@ -92,6 +98,25 @@ const validatePasswordField = (value: any): ReqResponse<any> => {
 
         if (!PASSWORD_RANGE.IsStringInRange(passwordString)) {
             return new ReqResponse(false, "ERRVALID_PASSWORD_LEN", PASSWORD_RANGE);
+        }
+
+        return new ReqResponse(true, "", null);
+    }
+    catch {
+        return new ReqResponse(false, "ERRVALID_INVALID", null);
+    }
+}
+
+const validatePostTitle = (value: any): ReqResponse<any> => {
+    try {
+        if (value == undefined) {
+            return new ReqResponse(false, "ERRVALID_CANTBENULL", null);
+        }
+
+        const posttitleString: string = value as string;
+
+        if (!POSTTITLE_RANGE.IsStringInRange(posttitleString)) {
+            return new ReqResponse(false, "ERRVALID_TITLE_LEN", POSTTITLE_RANGE);
         }
 
         return new ReqResponse(true, "", null);

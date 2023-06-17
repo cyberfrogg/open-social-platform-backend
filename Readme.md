@@ -1,4 +1,11 @@
-# Open Social Platform (user service)
+# Open Social Platform (backend)
+
+This repo contains backend source code of "Open Social Platform" project.
+
+## Features
+- User Auth
+- User Data fetch
+- Post creation
 
 ## SQL Database structure
 
@@ -21,3 +28,14 @@
 - userid : int(11) | foreign key of users.id
 - token : varchar(500)
 - create_time : timestamp | CURRENT_TIMESTAMP
+
+### Table "user_assets"
+```sql
+CREATE TABLE user_assets (
+    uuid varchar(36) UNIQUE,
+    userid int,
+    assettype varchar(20),
+    content json,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```

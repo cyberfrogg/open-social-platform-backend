@@ -10,7 +10,7 @@ const IsTurnstileValid = async (turnstileClientResponse: string, remoteIp: strin
     }
 
     const form = new URLSearchParams();
-    form.append("secret", process.env.NEXT_PRIVATE_CLOUDFLARE_CAPTCHA_PRIVATETOKEN as string)
+    form.append("secret", process.env.SERVER_API_TURNSTILE_KEY_PRIVATE as string)
     form.append("response", turnstileClientResponse);
     form.append("remoteip", remoteIp);
 
