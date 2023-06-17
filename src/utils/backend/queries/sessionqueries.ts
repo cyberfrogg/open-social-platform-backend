@@ -12,6 +12,7 @@ interface ISessionQueries extends IDatabaseQueryCollection {
 }
 
 class SessionQueries implements ISessionQueries {
+
     readonly Name: string = "SessionQueries";
 
     Initialize(): Promise<void> {
